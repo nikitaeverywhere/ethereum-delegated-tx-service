@@ -15,10 +15,13 @@ export const ethereumGlobalConfig = {
   rpcProviders: [ // RPC endpoints
     "https://mainnet.infura.io/v3/26330e580e9d49ffb91482c15a92e86a"
   ],
-  etherscanProviderApiKey: "", // Fallback to Etherscan provider if specified
-  maxPendingTransactions: 5,
-  maxPendingTransactionsPerAccount: 5
+  etherscanProviderApiKey: "" // Fallback to Etherscan provider if specified
 };
+
+export const instanceConfig = {
+  maxPendingTransactionsPerAccount: 5,
+  defaultExpiresAtSeconds: 60 * 60, // If manifest does not add "expiresAt" to context, this value is used as ${now} + ${defaultRequestExpirationSeconds}
+}
 
 ///////////////////////////////////////////////////////////////////
 

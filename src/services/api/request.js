@@ -9,10 +9,10 @@ export const handler = (app) => app.post("/request", asyncErrorHandler(async (re
   if (error) {
     return res.status(400).send({ error });
   }
-  const { contractAddress, functionName, functionArguments, sender, gasLimit } = req.body;
+  const { contractAddress, functionName, functionArguments, signer, gasLimit } = req.body;
   let request;
   try {
-    request = await createRequest({ contractAddress, functionName, functionArguments, sender, gasLimit });
+    request = await createRequest({ contractAddress, functionName, functionArguments, signer, gasLimit });
   } catch (e) {
     return res.status(400).send({ error: e.toString() });
   }
@@ -26,13 +26,13 @@ export const handler = (app) => app.post("/request", asyncErrorHandler(async (re
 }));
 
 async function validateRequest (req) {
-  let { contractAddress, functionName, functionArguments, sender, gasLimit } = req.body;
+  let { contractAddress, functionName, functionArguments, signer, gasLimit } = req.body;
   // functionArguments are not validated until response is generated
   if (!isValidEthereumAddress(contractAddress)) {
     return `Invalid parameter \`contractAddress\`=${ contractAddress } given, must be Ethereum address`;
   }
-  if (!isValidEthereumAddress(sender)) {
-    return `Invalid parameter \`sender\`=${ sender } given, must be Ethereum address`;
+  if (!isValidEthereumAddress(signer)) {
+    return `Invalid parameter \`signer\`=${ signer } given, must be Ethereum address`;
   }
   if (typeof(functionName) !== "string") {
     return `Invalid parameter \`functionName\`=${ functionName } given, must be a string`;

@@ -37,7 +37,7 @@ export const delegatedFunctions = [
             {
               "type": "address",
               "name": "Sender's Address",
-              "value": context.sender
+              "value": context.signer
             },
             {
               "type": "address",
@@ -77,7 +77,7 @@ export const delegatedFunctions = [
             ["address", "address", "address", "uint256", "uint256", "address", "uint256", "uint256"],
             [
               context.contract.address,
-              context.sender,
+              context.signer,
               context.functionArguments[0],
               context.functionArguments[1],
               context.calculatedTokenFee,
@@ -91,7 +91,7 @@ export const delegatedFunctions = [
     }),
     delegatedFunctionName: "transferViaSignature",
     delegatedFunctionArguments: (context) => [
-      context.sender, // address     from,
+      context.signer, // address     from,
       context.functionArguments[0], // address     to,
       context.functionArguments[1], // uint256     value,
       context.calculatedTokenFee, // uint256     fee,
