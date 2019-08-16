@@ -1,0 +1,23 @@
+# Docker compose (for local testing; when deploying, configure the container to use external MongoDB)
+version: "3"
+services:
+    api:
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        tty: true
+        stdin_open: true
+        ports:
+            - 8080:80
+        volumes:
+            - ./:/app # Development
+            - /app/node_modules
+        links:
+            - mongo
+    mongo:
+        ports:
+            - 27999:27017
+        image: mongo:4.0.0
+        tty: true
+        privileged: true
+        stdin_open: true

@@ -1,0 +1,44 @@
+{
+  "name": "ethereum-delegated-tx-service",
+  "version": "1.0.0",
+  "description": "Universal back end for delegated transactions for Ethereum; pay fee in tokens instead of Ether",
+  "main": "src/index.js",
+  "module": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node -r esm src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZitRos/ethereum-delegated-tx-service.git"
+  },
+  "keywords": [
+    "ethereum",
+    "delegated",
+    "transactions",
+    "fee",
+    "in",
+    "tokens",
+    "feeless",
+    "crypto"
+  ],
+  "author": {
+    "name": "Nikita Savchenko",
+    "url": "https://nikita.tk"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ZitRos/ethereum-delegated-tx-service/issues"
+  },
+  "homepage": "https://github.com/ZitRos/ethereum-delegated-tx-service#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.19.0",
+    "esm": "^3.2.25",
+    "ethers": "^4.0.33",
+    "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
+    "mongodb": "^3.3.0",
+    "uuid": "^3.3.2"
+  }
+}

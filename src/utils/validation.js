@@ -1,0 +1,1 @@
+export const isValidEthereumAddress = (address) => typeof(address) === "string" && address.match(/^0x[0-9A-F]{40}$/i);
