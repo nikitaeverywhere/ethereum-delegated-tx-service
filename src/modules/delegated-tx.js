@@ -1,8 +1,27 @@
 import uuid from "uuid/v4";
-import { getManifest, ethereumGlobalConfig } from "../../config";
+import { getManifest, ethereumGlobalConfig, instanceConfig } from "../../config";
 import { contextUtils } from "./context";
-import { getContract } from "./ethers";
+import { getContract, provider } from "./ethers";
 import { DelegateRequest } from "../db";
+import { syncAndPublish } from "./transactions";
+
+async function getEthToUsd () {
+  for (const { endpoint, getter, cacheDuration } of instanceConfig.ethToUsdPriceEndpoints) {
+    try {
+      let res = await contextUtils.httpGetWithCache(endpoint, {
+        cacheFor: cacheDuration || 5 * 60 * 1000,
+        throwOnErrors: true
+      });
+      if (typeof(getter) === "function") {
+        res = getter(res);
+      }
+      return res;
+    } catch (e) {
+      console.warn(`Endpoint ETH/USD retrieval failed for ${ endpoint } (${ e }), switching to the next endpoint`);
+    }
+  }
+  return 999999999;
+}
 
 export async function createRequest ({ contractAddress, functionName, functionArguments, signer, gasLimit, ...rest }) {
 
@@ -22,8 +41,9 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     functionName,
     functionArguments,
     signer,
-    gasPriceUsd: 1.89e-7,          // 1 GWei, $180/ETH; Todo: provide;
-    gasLimit: rest.gasLimit,       // May not be specified
+    gasPriceWei: +(await provider.getGasPrice()), // Todo: cache
+    ethToUsd: await getEthToUsd(),
+    gasLimit: rest.gasLimit, // May not be specified
     utils: Object.assign({}, contextUtils)
   };
 
@@ -80,6 +100,8 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`Request id=${ requestId } has a broken context :(`);
   }
 
+  // Todo: check instanceConfig.maxPendingTransactions
+
   // Temp
   request.context.signature = signature;
   request.context.signatureStandard = signatureStandard;
@@ -108,7 +130,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
   }
 
   if (gasLimitEstimate > request.context.gasLimit) {
-    throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds gas limit of ${ request.context.gasLimit }. Provide a higher 'gasLimit' in delegated transaction request for your transaction`);
+    throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds requested gas limit ${ request.context.gasLimit }. Provide a higher 'gasLimit' in the delegated transaction request to confirm this transaction`);
   }
 
   const previousTransactions = await DelegateRequest.findCount({ expiresAt: { $gt: new Date(0) }, status: { $ne: "new" }, signer: request.signer });
@@ -116,7 +138,22 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same signer ${ request.signer }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
   }
 
-  throw new Error("Success: not implemented");
   // todo: save request.context.signature along with request.context.signatureStandard and function arguments
+
+  await DelegateRequest.findOneAndUpdate({ _id: request._id }, {
+    $set: {
+      status: DelegateRequest.status.confirmed,
+      signature,
+      signatureStandard,
+      delegatedFunctionName,
+      delegatedFunctionArguments
+    }
+  });
+
+  await syncAndPublish(); // Temporarily (should be in a separate worker)
+
+  return  await DelegateRequest.findOne({
+    _id: request._id
+  });
 
 }
