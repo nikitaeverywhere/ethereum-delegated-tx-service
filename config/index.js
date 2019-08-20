@@ -11,9 +11,9 @@ export const mongodbConfig = {
 };
 
 export const ethereumGlobalConfig = {
-  networkName: "mainnet",
+  networkName: "kovan",
   rpcProviders: [ // RPC endpoints
-    "https://mainnet.infura.io/v3/26330e580e9d49ffb91482c15a92e86a"
+    "https://kovan.infura.io/v3/26330e580e9d49ffb91482c15a92e86a"
   ],
   etherscanProviderApiKey: "", // Fallback to Etherscan provider if specified
   requiredConfirmations: 3 // How many confirmations are required until the transaction is treated as mined

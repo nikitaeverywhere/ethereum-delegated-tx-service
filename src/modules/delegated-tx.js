@@ -23,6 +23,12 @@ async function getEthToUsd () {
   return 999999999;
 }
 
+export async function getRequestById (requestId) {
+  return await DelegateRequest.findOne({
+    id: requestId
+  });
+}
+
 export async function createRequest ({ contractAddress, functionName, functionArguments, signer, gasLimit, ...rest }) {
 
   const manifest = await getManifest(contractAddress);

@@ -27,7 +27,7 @@ export async function syncAndPublish () {
   if (!lastMinedTx) { // No mined transactions: init; get the last nonce from the network
     nextNonce = await provider.getTransactionCount(delegateWallet.address);
   } else { // Mined transactions: pick the next nonce
-    nextNonce = lastMinedTx[0].nonce + 1;
+    nextNonce = lastMinedTx.nonce + 1;
   }
   console.log(`Next nonce is ${ nextNonce }`);
 
@@ -122,7 +122,7 @@ export async function syncAndPublish () {
 
       try { // Try to publish transaction
 
-        const { transactionHash, nonce } = await publishTransaction(request, nextNonce);
+        const { transactionHash, nonce, delegateAddress } = await publishTransaction(request, nextNonce);
         console.log(`TX hash=${ transactionHash }, nonce=${ nonce }`);
 
         await dr.findOneAndUpdate({ // Update status, transactionHash, nonce (can be higher due to unknown TXs)
@@ -131,7 +131,8 @@ export async function syncAndPublish () {
           $set: {
             status: DelegateRequest.status.mining,
             transactionHash: transactionHash,
-            nonce: nonce
+            nonce: nonce,
+            publishedBy: delegateAddress
           }
         });
 
@@ -167,14 +168,19 @@ export async function syncAndPublish () {
 async function publishTransaction (confirmedRequest, nonce) {
 
   const contract = await getContract(confirmedRequest.context.contract.address);
-  let transactionHash;
+  let transactionHash, delegate;
 
   while (true) {
     try {
       console.log(`Publish attempt`);
-      transactionHash = await contract.functions[confirmedRequest.delegatedFunctionName](...confirmedRequest.delegatedFunctionArguments.concat({
-        nonce
+      const tx = await contract.functions[confirmedRequest.delegatedFunctionName](...confirmedRequest.delegatedFunctionArguments.concat({
+        nonce,
+        ...(!confirmedRequest.context.gasLimit ? {} : {
+          gasLimit: confirmedRequest.context.gasLimit
+        })
       }));
+      transactionHash = tx.hash;
+      delegate = tx.from;
       break;
     } catch (e) {
       if (e.code === errorCode.NONCE_EXPIRED || e.code === errorCode.REPLACEMENT_UNDERPRICED) {
@@ -187,7 +193,8 @@ async function publishTransaction (confirmedRequest, nonce) {
 
   return {
     transactionHash,
-    nonce
+    nonce,
+    delegateAddress: delegate
   };
 
 }
