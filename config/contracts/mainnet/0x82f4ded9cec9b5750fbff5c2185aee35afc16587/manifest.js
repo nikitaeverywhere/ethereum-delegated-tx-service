@@ -13,7 +13,7 @@ const defaultContext = (opts) => async (context) => ({ // Adds returned properti
     context.gasLimit || opts.gasLimit || 200000, // Gas limit of a delegated function, not the original one (!)
     2 // x2 (PriceK = cover risks of volatility and actually get profit from delegating transactions)
   ).toString().replace(/\..+$/, ""),
-  feeRecipient: "0x6f8103606b649522aF9687e8f1e7399eff8c4a6B"
+  feeRecipient: "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A"
 });
 
 export const maxPendingTransactionsPerAccount = 5; // Should be 1 for nonce-based delegated tx implementation

@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { apiConfig } from "../../../config";
+import * as index from "./index-handler";
 import * as request from "./request";
 import * as confirm from "./confirm";
 import * as status from "./status";
@@ -9,11 +10,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.get("/", (_, res) => res.send({
-  "service-name": "ethereum-delegated-tx",
-  "info": "This service exposes 2 endpoints: /request and /confirm"
-}));
-
+index.handler(app);
 request.handler(app);
 confirm.handler(app);
 status.handler(app);

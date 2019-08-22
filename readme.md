@@ -36,3 +36,5 @@ Later, in the container, run
 ```bash
 npm run start
 ```
+
+Then open `http://localhost:8088`.

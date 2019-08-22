@@ -8,7 +8,7 @@ services:
         tty: true
         stdin_open: true
         ports:
-            - 8080:80
+            - 8088:80
         volumes:
             - ./:/app # Development
             - /app/node_modules
