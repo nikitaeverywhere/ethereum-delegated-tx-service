@@ -53,10 +53,14 @@ export async function getSupportedContracts () {
   for (const [address, { manifest, abi }] of map.entries()) {
     contracts.push({
       address,
-      implements: ["ERC20"],
-      functions: manifest.delegatedFunctions.reduce((o, f) => (o[f.functionName] = ({
+      implements: [
+        isErc20(abi) && "ERC20",
+        isErc721(abi) && "ERC721"
+      ].filter(o => !!o),
+      functions: manifest.delegatedFunctions.map(f => ({
+        name: f.functionName,
         arguments: (abi.find(o => o.name === f.functionName) || { inputs: [] }).inputs
-      })) && o, {})
+      }))
     });
   }
   return contracts;
@@ -79,4 +83,28 @@ function validateManifest (manifest, address = "0x<unknown>") {
 
   // Todo: more validation
 
+}
+
+function isErc20 (abi) {
+  const signatures = new Set();
+  for (const i of abi) {
+    signatures.add(`${ i.name }(${ i.inputs.map(inp => inp.type).join(",") })`);
+  }
+  return signatures.has("transfer(address,uint256)")
+    && signatures.has("transferFrom(address,address,uint256)")
+    && signatures.has("approve(address,uint256)")
+    && signatures.has("decimals()")
+    && signatures.has("totalSupply()")
+    && signatures.has("balanceOf(address)");
+}
+
+function isErc721 (abi) {
+  const signatures = new Set();
+  for (const i of abi) {
+    signatures.add(`${ i.name }(${ i.inputs.map(inp => inp.type).join(",") })`);
+  }
+  return signatures.has("transfer(address,uint256)")
+    && signatures.has("transferFrom(address,address,uint256)")
+    && signatures.has("approve(address,uint256)")
+    && signatures.has("ownerOf(uint256)");
 }
