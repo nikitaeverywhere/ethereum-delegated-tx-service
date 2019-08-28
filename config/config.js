@@ -7,7 +7,7 @@ export const apiConfig = {
 };
 
 export const mongodbConfig = {
-  url: isInDocker
+  url: isInDocker()
     ? "mongodb://mongo:27017" // === "mongo" in docker-compose.yml
     : "mongodb://127.0.0.1:27017",
   dbName: "ethereum-delegated-tx"
