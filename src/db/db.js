@@ -14,6 +14,7 @@ export const getDb = async () => {
       if (err) {
         dbClient = null;
         rej(err);
+        return;
       }
       dbClient = client.db(mongodbConfig.dbName);
       res(dbClient);
