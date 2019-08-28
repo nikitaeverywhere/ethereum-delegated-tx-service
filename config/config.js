@@ -1,3 +1,5 @@
+import isInDocker from "is-docker";
+
 export const apiConfig = {
   host: "0.0.0.0",
   port: 8088,
@@ -5,7 +7,9 @@ export const apiConfig = {
 };
 
 export const mongodbConfig = {
-  url: "mongodb://mongo:27017", // === "mongo" in docker-compose.yml
+  url: isInDocker
+    ? "mongodb://mongo:27017" // === "mongo" in docker-compose.yml
+    : "mongodb://127.0.0.1:27017",
   dbName: "ethereum-delegated-tx"
 };
 
