@@ -1,12 +1,12 @@
 export const apiConfig = {
   host: "0.0.0.0",
-  port: 80,
+  port: 8088,
   allowedOrigins: '*'
 };
 
 export const mongodbConfig = {
   url: "mongodb://mongo:27017", // === "mongo" in docker-compose.yml
-  dbName: "test"
+  dbName: "ethereum-delegated-tx"
 };
 
 export const ethereumGlobalConfig = {

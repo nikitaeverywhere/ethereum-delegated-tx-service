@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apk update && apk upgrade && apk add bash
 RUN rm -rf node_modules && npm install
 
-EXPOSE 80
+EXPOSE 8088
 
 # ENTRYPOINT ["npm", "run", "start"]
 ENTRYPOINT ["node"]
