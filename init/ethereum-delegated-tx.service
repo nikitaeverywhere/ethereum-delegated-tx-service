@@ -1,0 +1,12 @@
+[Unit]
+Description=Ethereum Delegated Transactions Service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1s
+ExecStart=/usr/bin/npm run start
+WorkingDirectory=/home/zitro/apps/ethereum-delegated-tx-service
+
+[Install]
+WantedBy=multi-user.target
