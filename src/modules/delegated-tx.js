@@ -96,6 +96,9 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
   if (!(request.signatureOptions instanceof Array)) {
     throw new Error(`Something bad with request id=${ requestId }, it has no signatureOptions recorded`);
   }
+  if (request.status !== DelegateRequest.status.new) {
+    throw new Error(`The request ${ requestId } has already been confirmed`);
+  }
 
   const sigOption = request.signatureOptions.find(o => o.standard === signatureStandard);
 
@@ -139,14 +142,15 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds requested gas limit ${ request.context.gasLimit }. Provide a higher 'gasLimit' in the delegated transaction request to confirm this transaction`);
   }
 
-  const previousTransactions = await DelegateRequest.findCount({ expiresAt: { $gt: new Date(0) }, status: { $ne: "new" }, signer: request.signer });
+  const previousTransactions = await DelegateRequest.findCount({ expiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, signer: request.signer });
   if (previousTransactions > maxPendingTransactionsPerAccount) {
     throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same signer ${ request.signer }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
   }
 
-  // todo: save request.context.signature along with request.context.signatureStandard and function arguments
-
-  await DelegateRequest.findOneAndUpdate({ _id: request._id }, {
+  const { value } = await DelegateRequest.findOneAndUpdate({
+    _id: request._id,
+    status: DelegateRequest.status.new // Prevents concurrency vulnerabilities
+  }, {
     $set: {
       status: DelegateRequest.status.confirmed,
       signature,
@@ -156,10 +160,8 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     }
   });
 
-  await syncAndPublish(); // Temporarily (should be in a separate worker)
+  // await syncAndPublish(); // Temporarily (should be in a separate worker)
 
-  return  await DelegateRequest.findOne({
-    _id: request._id
-  });
+  return value;
 
 }

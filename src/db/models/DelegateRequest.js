@@ -17,6 +17,7 @@ let collectionPromise = getCollection("delegate-request");
   });
 })();
 
+// DO NOT RENAME PROPERTIES! USED TO GENERATED "status" IN RESPONSE BY PROPERTY NAME.
 export const status = {
   new: 0, // the delegated transaction request was just requested and is not confirmed yet
   confirmed: 1, // the transaction is confirmed and is ready to be published (picked up by worker shortly)

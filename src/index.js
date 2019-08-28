@@ -1,3 +1,7 @@
 import { startApi } from "./services/api";
+import { startWorker } from "./services/worker";
 
-startApi();
+(async () => {
+  await startWorker();
+  await startApi();
+})();

@@ -1,5 +1,6 @@
 import asyncErrorHandler from "express-async-handler";
 import { confirmRequest } from "../../modules/delegated-tx";
+import { status as delegateRequestStatuses } from "../../db/models/DelegateRequest";
 
 export const handler = (app) => app.post("/confirm", asyncErrorHandler(async (req, res) => {
   const error = await validateRequest(req);
@@ -13,7 +14,14 @@ export const handler = (app) => app.post("/confirm", asyncErrorHandler(async (re
   } catch (e) {
     return res.status(400).send({ error: e.toString() });
   }
-  return res.status(200).send({ result });
+  return res.status(200).send({
+    result: {
+      id: result.id,
+      status: Object.entries(delegateRequestStatuses).find(([, i]) => i === result.status)[0],
+      expiresAt: result.expiresAt,
+      transactionHash: result.transactionHash
+    }
+  });
 }));
 
 async function validateRequest (req) {

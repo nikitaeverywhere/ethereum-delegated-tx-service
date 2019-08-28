@@ -30,6 +30,7 @@ app.use((err, _, res, next) => { // Express error handler
 });
 
 export async function startApi () {
+  console.info("Starting API server...");
   return new Promise((resolve) => {
     app.listen(apiConfig.port, apiConfig.host, () => {
       console.info(`API is up on http://${ apiConfig.host }:${ apiConfig.port }`);

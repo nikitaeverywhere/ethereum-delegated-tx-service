@@ -20,7 +20,8 @@ export const handler = (app) => app.post("/request", asyncErrorHandler(async (re
     request: {
       id: request.id,
       fee: request.fee,
-      signatureOptions: request.signatureOptions
+      signatureOptions: request.signatureOptions,
+      expiresAt: request.expiresAt
     }
   });
 }));
