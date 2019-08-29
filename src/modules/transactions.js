@@ -1,13 +1,14 @@
 import { DelegateRequest } from "../db";
-import { instanceConfig, ethereumGlobalConfig } from "../../config";
+import { ethereumGlobalConfig } from "../../config";
 import { provider, errorCode, getWallet, getContract } from "./ethers";
+import { isNonceTooLowError, getStatusNameFromStatus } from "../utils";
 
 // Must always run single-threaded
 export async function syncAndPublish () {
 
   const dr = await DelegateRequest.collection();
   const delegateWallet = await getWallet();
-  console.log(`Sync and publish start; delegateWallet=${ delegateWallet.address }`);
+  console.log(`${ new Date().toISOString() } | >>> Sync and publish start; delegateWallet=${ delegateWallet.address }`);
 
   // Step 1. Find the last mined transaction in the local DB and determine the next nonce
   // Delegated Req [mined    ] -> [mining   ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
@@ -29,7 +30,7 @@ export async function syncAndPublish () {
   } else { // Mined transactions: pick the next nonce
     nextNonce = lastMinedTx.nonce + 1;
   }
-  console.log(`Next nonce is ${ nextNonce }`);
+  console.log(`${ new Date().toISOString() } | >>> Next nonce is ${ nextNonce }`);
 
   // Step 2. Query all con-new or failed transactions that go after the mined transactions.
   //         Also pick mined transactions that may have appeared in a little while (concurrent).
@@ -56,21 +57,21 @@ export async function syncAndPublish () {
     .toArray();
 
   // Step 3. Start traversing all found delegated transaction requests
-  console.log(`Number of requests: ${ requestQueue.length }`);
+  console.log(`${ new Date().toISOString() } | >>> Number of requests in queue: ${ requestQueue.length }`);
 
   for (let i = 0; i < requestQueue.length; ++i) {
 
     const request = requestQueue[i];
-    console.log(`Processing request #${ i } status ${ request.status }`);
+    console.log(`${ new Date().toISOString() } | >>> Processing request #${ i } with status ${ getStatusNameFromStatus(request.status) }`);
 
     // Step 3.1. As for mined transactions, just get the nonce and keep going
     // Delegated Req [mined    ] -> [mined    ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
     // Props         [nonce=3  ] -> [NONCE=4  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ]
     // Step                         ^^^^^^^^^^^
     if (request.status === DelegateRequest.status.mined) {
-      console.log(`Request status is mined, skipping`);
 
       nextNonce = request.nonce + 1;
+      console.log(`${ new Date().toISOString() } | >>> Request status is mined, skipping with nextNonce=${nextNonce}`);
       continue;
 
     // Step 3.2. As for transaction that are currently in the mining state, get their status and see all options
@@ -78,7 +79,7 @@ export async function syncAndPublish () {
     // Props         [nonce=3  ] -> [nonce=4  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ]
     // Step                                        ^^^^^^^^^^^
     } else if (request.status === DelegateRequest.status.mining) {
-      console.log(`Request status is mining`);
+      console.log(`${ new Date().toISOString() } | >>> Request status is mining, getting receipt...`);
 
       const txReceipt = await provider.getTransactionReceipt(request.transactionHash);
 
@@ -93,7 +94,7 @@ export async function syncAndPublish () {
         txReceipt.cumulativeGasUsed = +txReceipt.cumulativeGasUsed;
         // If enough confirmations, mark TX as mined
         const { nonce } = await provider.getTransaction(request.transactionHash);
-        
+
         await dr.findOneAndUpdate({
           _id: request._id
         }, {
@@ -103,6 +104,8 @@ export async function syncAndPublish () {
             nonce
           }
         });
+        
+        console.log(`${ new Date().toISOString() } | >>> Transaction ${request.transactionHash} is mined`);
 
         nextNonce = nonce + 1;
         continue;
@@ -118,12 +121,12 @@ export async function syncAndPublish () {
     // Props         [nonce=3  ] -> [nonce=4  ] -> [nonce=5  ] -> [nonce=6  ] -> [nonce=7  ] -> [nonce=?  ]
     // Step                                                                      ^^^^^^^^^^^
     } else if (request.status === DelegateRequest.status.confirmed) {
-      console.log(`Request status is confirmed, publishing`);
+      console.log(`${ new Date().toISOString() } | >>> Request status is confirmed, publishing (nonce=${nextNonce})`);
 
       try { // Try to publish transaction
 
         const { transactionHash, nonce, delegateAddress } = await publishTransaction(request, nextNonce);
-        console.log(`TX hash=${ transactionHash }, nonce=${ nonce }`);
+        console.log(`${ new Date().toISOString() } | >>> Published TX hash=${ transactionHash }, nonce=${ nonce }`);
 
         await dr.findOneAndUpdate({ // Update status, transactionHash, nonce (can be higher due to unknown TXs)
           _id: request._id
@@ -148,7 +151,7 @@ export async function syncAndPublish () {
             status: DelegateRequest.status.failed,
             reason: e.code === errorCode.INSUFFICIENT_FUNDS
               ? "Delegate account has no Ether on its balance"
-              : "Transaction error when publishing: " + e.toString()
+              : "Transaction error when publishing: " + (e.message || (e + ''))
           }
         });
 
@@ -157,7 +160,7 @@ export async function syncAndPublish () {
       }
 
     } else {
-      console.warn(`Unknown request status ${ request.status } skipped (?)`);
+      console.warn(`${ new Date().toISOString() } | >>> Unknown request status ${ request.status } skipped (?)`);
       continue;
     }
 
@@ -172,7 +175,6 @@ async function publishTransaction (confirmedRequest, nonce) {
 
   while (true) {
     try {
-      console.log(`Publish attempt`);
       const tx = await contract.functions[confirmedRequest.delegatedFunctionName](...confirmedRequest.delegatedFunctionArguments.concat({
         nonce,
         ...(!confirmedRequest.context.gasLimit ? {} : {
@@ -183,7 +185,8 @@ async function publishTransaction (confirmedRequest, nonce) {
       delegate = tx.from;
       break;
     } catch (e) {
-      if (e.code === errorCode.NONCE_EXPIRED || e.code === errorCode.REPLACEMENT_UNDERPRICED) {
+      if (isNonceTooLowError(e)) {
+        console.log(`${ new Date().toISOString() } | >>> Nonce ${ nonce } is too low, incrementing and trying again...`);
         ++nonce;
         continue;
       }

@@ -1,6 +1,6 @@
 import asyncErrorHandler from "express-async-handler";
 import { getRequestById } from "../../modules/delegated-tx";
-import { status as delegateRequestStatuses } from "../../db/models/DelegateRequest";
+import { getStatusNameFromStatus } from "../../utils";
 
 export const handler = (app) => app.get("/status/:requestId", asyncErrorHandler(async (req, res) => {
   const { requestId } = req.params;
@@ -9,7 +9,7 @@ export const handler = (app) => app.get("/status/:requestId", asyncErrorHandler(
     ? {
       result: {
         id: request.id,
-        status: Object.entries(delegateRequestStatuses).find(([, i]) => i === request.status)[0],
+        status: getStatusNameFromStatus(request.status),
         expiresAt: request.expiresAt,
         transactionHash: request.transactionHash,
         reason: request.reason

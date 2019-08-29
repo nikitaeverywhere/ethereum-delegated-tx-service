@@ -1,6 +1,6 @@
 import asyncErrorHandler from "express-async-handler";
 import { confirmRequest } from "../../modules/delegated-tx";
-import { status as delegateRequestStatuses } from "../../db/models/DelegateRequest";
+import { getStatusNameFromStatus } from "../../utils";
 
 export const handler = (app) => app.post("/confirm", asyncErrorHandler(async (req, res) => {
   const error = await validateRequest(req);
@@ -17,7 +17,7 @@ export const handler = (app) => app.post("/confirm", asyncErrorHandler(async (re
   return res.status(200).send({
     result: {
       id: result.id,
-      status: Object.entries(delegateRequestStatuses).find(([, i]) => i === result.status)[0],
+      status: getStatusNameFromStatus(result.status),
       expiresAt: result.expiresAt,
       transactionHash: result.transactionHash
     }

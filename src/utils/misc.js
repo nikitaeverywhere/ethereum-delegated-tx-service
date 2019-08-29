@@ -1,3 +1,9 @@
+import { status as delegateRequestStatuses } from "../db/models/DelegateRequest";
+
+export const getStatusNameFromStatus = (status) => {
+  return Object.entries(delegateRequestStatuses).find(([, i]) => i === status)[0];
+}
+
 /**
  * Loops the function every {interval}, but waits until the previous job is done.
  * @param {number} interval - Minimum time in milliseconds to wait between loops.
