@@ -11,7 +11,8 @@ export const handler = (app) => app.get("/status/:requestId", asyncErrorHandler(
         id: request.id,
         status: Object.entries(delegateRequestStatuses).find(([, i]) => i === request.status)[0],
         expiresAt: request.expiresAt,
-        transactionHash: request.transactionHash
+        transactionHash: request.transactionHash,
+        reason: request.reason
       }
     }
     : {

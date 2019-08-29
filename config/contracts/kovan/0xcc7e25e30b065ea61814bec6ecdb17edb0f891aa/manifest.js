@@ -22,7 +22,7 @@ export const delegatedFunctions = [
   {
     functionName: "transfer",
     requestContext: defaultContext({
-      gasLimit: 150000
+      gasLimit: 100000
     }),
     requestHandler: (context) => ({ // Response generator, must use context only
       fee: context.calculatedTokenFee,
