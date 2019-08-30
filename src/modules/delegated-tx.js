@@ -1,7 +1,7 @@
 import uuid from "uuid/v4";
 import { getManifest, ethereumGlobalConfig, instanceConfig } from "../../config";
 import { contextUtils } from "./context";
-import { getContract, provider } from "./ethers";
+import { getContract, provider, getGasPrice } from "./ethers";
 import { DelegateRequest } from "../db";
 
 async function getEthToUsd () {
@@ -41,13 +41,13 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     ...rest,
     contract: {
       address: contractAddress,
-      decimals: +(await contract.decimals())
+      decimals: +(await contract.decimals()) // Todo: cache
     },
     functionName,
     functionArguments,
     signer,
-    gasPriceWei: +(await provider.getGasPrice()), // Todo: cache
-    ethToUsd: await getEthToUsd(),
+    gasPriceWei: await getGasPrice(), // Cached
+    ethToUsd: await getEthToUsd(), // Cached
     gasLimit: rest.gasLimit, // May not be specified
     utils: Object.assign({}, contextUtils)
   };

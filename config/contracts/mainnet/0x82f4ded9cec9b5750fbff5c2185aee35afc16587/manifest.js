@@ -8,7 +8,7 @@ const defaultContext = (opts) => async (context) => ({ // Adds returned properti
       context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/dreambtc"),
       context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/btcusd")
     ])).map(res => 1 / res.ticker.last),
-    context.gasPriceWei / Math.pow(10, 18), // = gas price in ETH
+    +context.gasPriceWei / Math.pow(10, 18), // = gas price in ETH
     context.ethToUsd,
     context.gasLimit || opts.gasLimit || 200000, // Gas limit of a delegated function, not the original one (!)
     2 // x2 (PriceK = cover risks of volatility and actually get profit from delegating transactions)

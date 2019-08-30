@@ -2,6 +2,7 @@ import { DelegateRequest } from "../db";
 import { ethereumGlobalConfig } from "../../config";
 import { provider, errorCode, getWallet, getContract } from "./ethers";
 import { isNonceTooLowError, getStatusNameFromStatus } from "../utils";
+import { utils as ethersUtils } from "ethers";
 
 // Must always run single-threaded
 export async function syncAndPublish () {
@@ -179,6 +180,9 @@ async function publishTransaction (confirmedRequest, nonce) {
         nonce,
         ...(!confirmedRequest.context.gasLimit ? {} : {
           gasLimit: confirmedRequest.context.gasLimit
+        }),
+        ...(!confirmedRequest.context.gasPriceWei ? {} : {
+          gasPrice: ethersUtils.bigNumberify(confirmedRequest.context.gasPriceWei)
         })
       }));
       transactionHash = tx.hash;
