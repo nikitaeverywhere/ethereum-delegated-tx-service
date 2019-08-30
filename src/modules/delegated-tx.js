@@ -3,7 +3,6 @@ import { getManifest, ethereumGlobalConfig, instanceConfig } from "../../config"
 import { contextUtils } from "./context";
 import { getContract, provider } from "./ethers";
 import { DelegateRequest } from "../db";
-import { syncAndPublish } from "./transactions";
 
 async function getEthToUsd () {
   for (const { endpoint, getter, cacheDuration } of instanceConfig.ethToUsdPriceEndpoints) {
@@ -85,7 +84,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
   const now = new Date();
   const request = await DelegateRequest.findOne({
     id: requestId,
-    expiresAt: {
+    requestExpiresAt: {
       $gte: now
     }
   });
@@ -142,7 +141,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds requested gas limit ${ request.context.gasLimit }. Provide a higher 'gasLimit' in the delegated transaction request to confirm this transaction`);
   }
 
-  const previousTransactions = await DelegateRequest.findCount({ expiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, signer: request.signer });
+  const previousTransactions = await DelegateRequest.findCount({ requestExpiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, signer: request.signer });
   if (previousTransactions > maxPendingTransactionsPerAccount) {
     throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same signer ${ request.signer }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
   }
@@ -159,8 +158,6 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
       delegatedFunctionArguments
     }
   });
-
-  // await syncAndPublish(); // Temporarily (should be in a separate worker)
 
   return value;
 

@@ -25,7 +25,7 @@ export const ethereumGlobalConfig = {
 export const instanceConfig = {
   maxPendingTransactionsPerAccount: 5,
   maxPendingTransactions: 50,
-  defaultExpiresAtSeconds: 60 * 60, // If manifest does not add "expiresAt" to context, this value is used as ${now} + ${defaultRequestExpirationSeconds}
+  requestExpiresAfterSeconds: 30 * 60, // Number of seconds the delegated transaction request is alive
   ethToUsdPriceEndpoints: [ // JSON endpoints. If one of them is not available, the next one is queried
     {
       endpoint: "https://api.coinmarketcap.com/v1/ticker/ethereum/",

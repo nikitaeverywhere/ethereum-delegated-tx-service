@@ -1,6 +1,6 @@
 const defaultContext = (opts) => async (context) => ({ // Adds returned properties to context prior to requestHandler. Can have side effects and is saved to DB prior to response
   signatureId: context.utils.randomInt32(),  // "nonce": use DB/Ethereum calls in case your token counts nonce
-  expiresAt: Math.floor((Date.now() + 1000 * 60 * 30) / 1000).toString(),
+  expiresAt: Math.floor((Date.now() + 1000 * 60 * 60 * 24) / 1000).toString(),
   gasLimit: context.gasLimit || opts.gasLimit || 200000,
   calculatedTokenFee: context.utils.multiply(
     Math.pow(10, context.contract.decimals),

@@ -21,7 +21,7 @@ export const handler = (app) => app.post("/request", asyncErrorHandler(async (re
       id: request.id,
       fee: request.fee,
       signatureOptions: request.signatureOptions,
-      expiresAt: request.expiresAt
+      expiresAt: request.requestExpiresAt
     }
   });
 }));

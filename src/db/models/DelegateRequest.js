@@ -12,7 +12,7 @@ let collectionPromise = getCollection("delegate-request");
   });
   await collection.createIndex({
     status: 1,
-    expiresAt: 1,
+    requestExpiresAt: 1,
     signer: 1
   });
 })();
@@ -37,9 +37,7 @@ export async function create ({ id, context, signer, fee, signatureOptions }) {
     fee,
     signatureOptions,
     createdAt: now,
-    expiresAt: context.expiresAt
-      ? new Date(context.expiresAt * 1000)
-      : new Date(now.getTime() + instanceConfig.defaultExpiresAtSeconds * 1000)
+    requestExpiresAt: new Date(now.getTime() + instanceConfig.requestExpiresAfterSeconds * 1000)
   });
   const doc = result.ops[0];
   delete doc._id;

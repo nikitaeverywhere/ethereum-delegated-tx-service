@@ -18,7 +18,7 @@ export const handler = (app) => app.post("/confirm", asyncErrorHandler(async (re
     result: {
       id: result.id,
       status: getStatusNameFromStatus(result.status),
-      expiresAt: result.expiresAt,
+      expiresAt: (result.context && result.context.expiresAt && new Date(+result.context.expiresAt * 1000)) || result.requestExpiresAt,
       transactionHash: result.transactionHash
     }
   });

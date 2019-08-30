@@ -104,14 +104,14 @@ export async function syncAndPublish () {
             nonce
           }
         });
-        
+
         console.log(`${ new Date().toISOString() } | >>> Transaction ${request.transactionHash} is mined`);
 
         nextNonce = nonce + 1;
         continue;
 
       } else { // No TX receipt so far: wait for it; republish TX
-        // Temporarily: do nothing (just wait)
+        // Do nothing (just wait), and skip to the next transaction in the queue
         ++nextNonce;
         continue;
       }
