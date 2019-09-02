@@ -1,29 +1,43 @@
 import { randomBytes } from "crypto";
-import { get } from "axios";
 import { utils } from "ethers";
+import { getContract } from "./ethers";
+import { httpGetWithCache } from "../utils";
 
-const getCache = new Map(); // url => { cachedAt, response }
+// In functions, this === request context
+const contextUtils = {
 
-export const contextUtils = {
   signatureStandards: {
     eth_signTypedData: "eth_signTypedData",
     eth_personalSign: "eth_personalSign"
   },
+
   randomInt32: () => `0x${ randomBytes(32).toString("hex") }`,
-  httpGetWithCache: async (url, { cacheFor = 60 * 1000, throwOnErrors = false } = {}) => {
-    const cached = getCache.get(url) || { cachedAt: 0, response: null };
-    if (cached.cachedAt + cacheFor > Date.now()) {
-      return cached.response;
-    }
-    try {
-      return (await get(url)).data;
-    } catch (e) {
-      if (throwOnErrors) {
-        throw new Error(`Request to ${ url } failed: ${ e }`);
-      }
-      return cached.response || { error: e.toString() };
-    }
-  },
   keccak256: (types, values) => utils.solidityKeccak256(types, values),
-  multiply: (...args) => args.length ? args.reduce((acc, v) => acc * v, 1) : 0  // Todo: deal with big numbers
+  httpGetWithCache,
+
+  /**
+   * Multiplies all arguments. Todo: precision multiplication, dealing with big numbers (-> BigNumber -> String)
+   */
+  multiply: (...args) => args.length ? args.reduce((acc, v) => acc * v, 1) : 0,
+
+  /**
+   * Estimates gas for the current function in context (not the delegated one!).
+   */
+  getOriginalFunctionGasEstimate: async function () {
+    const { contract: { address }, functionName, signer, functionArguments } = this;
+    const smartContract = await getContract(address);
+    return +(await smartContract.estimate[functionName].apply(smartContract.estimate, functionArguments.concat({ from: signer })));
+  }
+
 };
+
+/**
+ * Binds `utils` property to context.
+ * @param {Object} context - Request context.
+ * @returns {Object} - Context with utils property.
+ */
+export const bindContextUtils = (context) => (
+  context.utils = Object.fromEntries(Object.entries(contextUtils).map(
+    ([p,v]) => [p,typeof v === "function" ? v.bind(context) : v])
+  )
+) && context;

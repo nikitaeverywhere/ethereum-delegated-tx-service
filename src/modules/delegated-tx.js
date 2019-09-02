@@ -1,13 +1,14 @@
 import uuid from "uuid/v4";
 import { getManifest, ethereumGlobalConfig, instanceConfig } from "../../config";
-import { contextUtils } from "./context";
-import { getContract, provider, getGasPrice } from "./ethers";
+import { bindContextUtils } from "./context";
+import { getContract, getGasPrice } from "./ethers";
 import { DelegateRequest } from "../db";
+import { httpGetWithCache } from "../utils";
 
 async function getEthToUsd () {
   for (const { endpoint, getter, cacheDuration } of instanceConfig.ethToUsdPriceEndpoints) {
     try {
-      let res = await contextUtils.httpGetWithCache(endpoint, {
+      let res = await httpGetWithCache(endpoint, {
         cacheFor: cacheDuration || 5 * 60 * 1000,
         throwOnErrors: true
       });
@@ -48,16 +49,22 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     signer,
     gasPriceWei: await getGasPrice(), // Cached
     ethToUsd: await getEthToUsd(), // Cached
-    gasLimit: rest.gasLimit, // May not be specified
-    utils: Object.assign({}, contextUtils)
+    gasLimit: rest.gasLimit || undefined // May not be specified
   };
+  bindContextUtils(baseContext);
 
-  const context = Object.assign(
-    baseContext,
-    functionManifest.requestContext
-      ? await functionManifest.requestContext(baseContext)
-      : {}
-  );
+  let context;
+  try {
+    context = Object.assign(
+      baseContext,
+      functionManifest.requestContext
+        ? await functionManifest.requestContext(baseContext)
+        : {}
+    );
+  } catch (e) {
+    console.error(e);
+    throw new Error(`Error when preparing request context (requestContext call in manifest): ${ e }`);
+  }
 
   let response;
 
@@ -110,7 +117,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
 
   // Todo: check instanceConfig.maxPendingTransactions
 
-  // Temp
+  bindContextUtils(request.context);
   request.context.signature = signature;
   request.context.signatureStandard = signatureStandard;
 

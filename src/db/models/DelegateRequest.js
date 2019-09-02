@@ -29,11 +29,12 @@ export const status = {
 export async function create ({ id, context, signer, fee, signatureOptions }) {
   const collection = await collectionPromise;
   const now = new Date();
+  const { utils, ...ctx } = context;
   const result = await collection.insertOne({
     id,
     status: status.new,
     signer,
-    context,
+    context: ctx,
     fee,
     signatureOptions,
     createdAt: now,
