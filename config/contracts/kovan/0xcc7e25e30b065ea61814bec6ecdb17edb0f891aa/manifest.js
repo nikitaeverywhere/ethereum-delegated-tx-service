@@ -34,7 +34,7 @@ export const delegatedFunctions = [
     requestContext: defaultContext({
       // By this contract, gasLimit is determined as a call to the transfer function
       // + additional gas for transferViaSignature which is pretty much constant (~51000-52000 gas).
-      gasLimit: async (context) => 45000 + await context.utils.getOriginalFunctionGasEstimate()
+      gasLimit: async (context) => 46000 + await context.utils.getOriginalFunctionGasEstimate()
     }),
     requestHandler: (context) => ({ // Response generator, must use context only
       fee: context.calculatedTokenFee,
