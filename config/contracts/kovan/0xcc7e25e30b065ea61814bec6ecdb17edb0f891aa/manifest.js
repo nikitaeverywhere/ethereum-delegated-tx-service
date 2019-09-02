@@ -20,7 +20,7 @@ const defaultContext = (opts) => async (context) => { // Adds returned propertie
       +context.gasPriceWei / Math.pow(10, 18), // = gas price in ETH
       context.ethToUsd,
       gasLimit, // Gas limit of a delegated function, not the original one (!)
-      2 // x2 (PriceK = cover risks of volatility and actually get profit from delegating transactions)
+      2 // x2 to finally get profit out of delegated transaction
     ).toString().replace(/\..+$/, ""),
     feeRecipient: "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A"
   };
