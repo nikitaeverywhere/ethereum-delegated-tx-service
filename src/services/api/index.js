@@ -9,8 +9,9 @@ import * as status from "./status";
 
 const app = express();
 
-app.use(cors({
-  origin: apiConfig.allowedOrigins || '*'
+const origins = apiConfig.allowedOrigins || '*';
+app.use(origins === '*' ? cors() : cors({
+  origin: origins
 }));
 app.use(bodyParser.json());
 
