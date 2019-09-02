@@ -1,3 +1,4 @@
+import fromEntries from "fromentries";
 import { randomBytes } from "crypto";
 import { utils } from "ethers";
 import { getContract } from "./ethers";
@@ -37,7 +38,7 @@ const contextUtils = {
  * @returns {Object} - Context with utils property.
  */
 export const bindContextUtils = (context) => (
-  context.utils = Object.fromEntries(Object.entries(contextUtils).map(
+  context.utils = fromEntries(Object.entries(contextUtils).map(
     ([p,v]) => [p,typeof v === "function" ? v.bind(context) : v])
   )
 ) && context;
