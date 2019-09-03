@@ -50,7 +50,7 @@ export const delegatedFunctions = [
             {
               "type": "address",
               "name": "Sender's Address",
-              "value": context.signer
+              "value": context.from
             },
             {
               "type": "address",
@@ -90,7 +90,7 @@ export const delegatedFunctions = [
             ["address", "address", "address", "uint256", "uint256", "address", "uint256", "uint256"],
             [
               context.contract.address,
-              context.signer,
+              context.from,
               context.functionArguments[0],
               context.functionArguments[1],
               context.calculatedTokenFee,
@@ -104,7 +104,7 @@ export const delegatedFunctions = [
     }),
     delegatedFunctionName: "transferViaSignature",
     delegatedFunctionArguments: (context) => [
-      context.signer, // address     from,
+      context.from, // address     from,
       context.functionArguments[0], // address     to,
       context.functionArguments[1], // uint256     value,
       context.calculatedTokenFee, // uint256     fee,
@@ -140,7 +140,7 @@ export const delegatedFunctions = [
             {
               "type": "address",
               "name": "Withdrawal Approval Address",
-              "value": context.signer
+              "value": context.from
             },
             {
               "type": "address",
@@ -185,7 +185,7 @@ export const delegatedFunctions = [
             ["address", "address", "address", "uint256", "bytes", "uint256", "address", "uint256", "uint256"],
             [
               context.contract.address,
-              context.signer,
+              context.from,
               context.functionArguments[0],
               context.functionArguments[1],
               context.functionArguments[2],
@@ -200,7 +200,7 @@ export const delegatedFunctions = [
     }),
     delegatedFunctionName: "approveAndCallViaSignature",
     delegatedFunctionArguments: (context) => [
-      context.signer, // address     from,
+      context.from, // address     from,
       context.functionArguments[0], // address     to,
       context.functionArguments[1], // uint256     value,
       context.functionArguments[2], // bytes     extraData,

@@ -13,7 +13,7 @@ let collectionPromise = getCollection("delegate-request");
   await collection.createIndex({
     status: 1,
     requestExpiresAt: 1,
-    signer: 1
+    from: 1
   });
 })();
 
@@ -26,14 +26,14 @@ export const status = {
   failed: 4 // any failed attempts to publish or republish a transaction, including transaction drop, etc
 };
 
-export async function create ({ id, context, signer, fee, signatureOptions }) {
+export async function create ({ id, context, from, fee, signatureOptions }) {
   const collection = await collectionPromise;
   const now = new Date();
   const { utils, ...ctx } = context;
   const result = await collection.insertOne({
     id,
     status: status.new,
-    signer,
+    from,
     context: ctx,
     fee,
     signatureOptions,

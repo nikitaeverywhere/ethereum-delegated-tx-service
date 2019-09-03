@@ -29,7 +29,7 @@ export async function getRequestById (requestId) {
   });
 }
 
-export async function createRequest ({ contractAddress, functionName, functionArguments, signer, gasLimit, ...rest }) {
+export async function createRequest ({ contractAddress, functionName, functionArguments, from, gasLimit, ...rest }) {
 
   const manifest = await getManifest(contractAddress);
   const { delegatedFunctions } = manifest;
@@ -46,7 +46,7 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     },
     functionName,
     functionArguments,
-    signer,
+    from,
     gasPriceWei: await getGasPrice(), // Cached
     ethToUsd: await getEthToUsd(), // Cached
     gasLimit: rest.gasLimit || undefined // May not be specified
@@ -78,7 +78,7 @@ export async function createRequest ({ contractAddress, functionName, functionAr
   const delegateRequest = await DelegateRequest.create({
     id: uuid(),
     context,
-    signer,
+    from,
     ...response
   });
 
@@ -138,7 +138,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
 
   try {
     gasLimitEstimate = +(await contract.estimate[delegatedFunctionName].apply(contract.estimate, delegatedFunctionArguments.concat({
-      from: request.signer
+      from: request.from
     })));
   } catch (e) {
     throw new Error(`Function call estimation error: either invalid signature is given or delegate function errors when calling ${ delegatedFunctionName }('${ delegatedFunctionArguments.join("', '") }')`);
@@ -148,9 +148,9 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds requested gas limit ${ request.context.gasLimit }. Provide a higher 'gasLimit' in the delegated transaction request to confirm this transaction`);
   }
 
-  const previousTransactions = await DelegateRequest.findCount({ requestExpiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, signer: request.signer });
+  const previousTransactions = await DelegateRequest.findCount({ requestExpiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, from: request.from });
   if (previousTransactions > maxPendingTransactionsPerAccount) {
-    throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same signer ${ request.signer }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
+    throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same from=${ request.from }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
   }
 
   const { value } = await DelegateRequest.findOneAndUpdate({

@@ -45,7 +45,7 @@ To perform a delegated transaction, client performs 2 steps (+ 1 optional step t
 // >>>>>> POST /request
 {
 	"contractAddress": "0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa",
-	"signer": "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A",
+	"from": "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A",
 	"functionName": "transfer",
 	"functionArguments": ["0xeee835EaaD87175E20aC048F9E5592CFbEf9161D", "6000000"]
 }

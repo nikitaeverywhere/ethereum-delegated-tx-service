@@ -25,9 +25,9 @@ const contextUtils = {
    * Estimates gas for the current function in context (not the delegated one!).
    */
   getOriginalFunctionGasEstimate: async function () {
-    const { contract: { address }, functionName, signer, functionArguments } = this;
+    const { contract: { address }, functionName, from, functionArguments } = this;
     const smartContract = await getContract(address);
-    return +(await smartContract.estimate[functionName].apply(smartContract.estimate, functionArguments.concat({ from: signer })));
+    return +(await smartContract.estimate[functionName].apply(smartContract.estimate, functionArguments.concat({ from })));
   }
 
 };
