@@ -54,7 +54,8 @@ export async function findOne (q) {
 export async function findOneAndUpdate (q, u) {
   const collection = await collectionPromise;
   const result = await collection.findOneAndUpdate(q, u, {
-    returnNewDocument: true
+    returnNewDocument: true,
+    returnOriginal: false
   });
   return result;
 }
