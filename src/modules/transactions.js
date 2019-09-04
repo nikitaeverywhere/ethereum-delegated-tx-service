@@ -10,7 +10,7 @@ export async function syncAndPublish () {
 
   const dr = await DelegateRequest.collection();
   const delegateWallet = await getWallet();
-  console.log(`${ new Date().toISOString() } | >>> Sync and publish start; delegateWallet=${ delegateWallet.address }`);
+  console.log(`${ new Date().toISOString() } | >>> Sync and publish started`);
 
   // Step 1. Find the last mined transaction in the local DB and determine the next nonce
   // Delegated Req [mined    ] -> [mining   ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]

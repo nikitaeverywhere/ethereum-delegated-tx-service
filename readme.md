@@ -250,7 +250,7 @@ Then, put contract ABI and write a manifest file for each of your contract by ex
 - `config/contracts/$NETWORK_NAME/$CONTRACT_ADDRESS/abi.json`.
 - `config/contracts/$NETWORK_NAME/$CONTRACT_ADDRESS/manifest.js`.
 
-### 3. Prepare your smart contract manifest file
+### 3. Prepare your smart contract manifest file (or copy/modify an existing one)
 
 Your token and its delegated transactions implementation might be slightly different or completely
 different from [DREAM Token](https://etherscan.io/token/0x82f4ded9cec9b5750fbff5c2185aee35afc16587)
@@ -297,6 +297,24 @@ The `delegatedFunctions[...].requestContext` (async) function you specify in con
 you can calculate the fee based on a current network gas price, ETH price, or the price of your
 token. Check available examples to understand how can you write such a function.
 
+### 5. Input your delegate private key
+
+Delegate is an Ethereum account which actually publishes transactions on behalf of other accounts,
+**paying fees in Ether**, while collecting **fees in tokens** from these accounts. Hence, a delegate
+account should have some Ether balance in the network you're interacting with.
+
+By default, your back end will start with existing "public" delegate account `0xeee835eaad87175e20ac048f9e5592cfbef9161d`.
+Its private key is hard-coded and is used if you don't provide another private key. But please,
+**do not use it for production or even for testing**!
+
+You have 2 options of how to provide your very own private key to the container/back end:
+
+1. Set `DELEGATE_PK=2CCA...C1FA` environment variable.
+2. Put a single file with plain private key to `/config/delegate/<any-file-name>`.
+3. Use default public hard-coded private key (no way!).
+
+The delegate account's private key will be picked up from the above methods in order, if present.
+
 ## Development
 
 You can optionally use [Docker container](https://www.docker.com) with Docker Compose to launch
@@ -327,3 +345,10 @@ You can play with [DREAM Token in Kovan network](https://kovan.etherscan.io/toke
 To mint DREAM Token, call its `mintTokens` function. Then, `sender` will get 10 DREAM tokens.
 Later, you will be able to transfer these tokens using
 [delegated transactions service](https://zitros.github.io/ethereum-delegated-tx-widget/).
+
+## Is there anything missing?
+
+❓ Do not hesitate to ask anything regarding delegated transactions [here](https://github.com/ZitRos/ethereum-delegated-tx-service/issues) (for back end and general inquiries), as well as [here](https://github.com/ZitRos/ethereum-delegated-tx-widget/issues)
+(for front end / widget).
+
+There is also an article coming soon, which will explain the concept in detail.

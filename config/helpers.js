@@ -1,7 +1,7 @@
-import { readdirSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { ethereumGlobalConfig } from "./config";
 
-const delegateFiles = readdirSync(`${ __dirname }/delegate`);
+const delegateFiles = readdirSync(`${ __dirname }/delegate`) || [];
 const manifestErrorPrefix = (address) => `Manifest validation failed for ${ address }:`;
 
 const contractsPath = `${ __dirname }/contracts/${ ethereumGlobalConfig.networkName }`;
@@ -39,15 +39,14 @@ export async function getManifest (contractAddress) {
   return manifest;
 }
 
-export async function getDelegatePrivateKey (delegateFile = delegateFiles[0]) {
+export async function getDelegatePrivateKey (delegateFile = delegateFiles.find(f => f.indexOf(".") !== 0)) {
   if (process.env.DELEGATE_PK) {
     return process.env.DELEGATE_PK;
   }
-  if (!delegateFiles.length) {
-    throw new Error("No delegates found in /config/delegate/*. Put a delegate private key there in the next format: { \"privateKey\": \"ABC...BCA\" }.");
+  if (delegateFile) {
+    return readFileSync(`${ __dirname }/delegate/${ delegateFile }`).toString();
   }
-  const json = await import(`./delegate/${ delegateFile }`); // Cached
-  return json.privateKey;
+  return "2CCA9531DB0839E6C11B4B318FAF801C4B425B16D0B6D89D6AC11FB61F6A5F4B";
 }
 
 function validateManifest (manifest, address = "0x<unknown>") {
