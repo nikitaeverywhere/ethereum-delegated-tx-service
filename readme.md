@@ -12,7 +12,10 @@ Primarily, delegated transactions, or meta transactions allow users to pay fee i
 
 <p align="center">
   <br/><b><a href="https://zitros.github.io/ethereum-delegated-tx-widget/" target="_blank">---> CHECK THE DEMO HERE! <---</a></b><br/><br/>
-  <img src="https://user-images.githubusercontent.com/4989256/64173367-cbec8080-ce5f-11e9-87c3-c1c77ae83dc4.png" alt="screenshot" width="360">
+  <img src="https://user-images.githubusercontent.com/4989256/64173367-cbec8080-ce5f-11e9-87c3-c1c77ae83dc4.png" alt="screenshot" width="360"><br/><br/>
+  Need test tokens? Use widget within <a href="https://zitros.github.io/ethereum-delegated-tx-widget/?contractAddress=0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa" target="_blank">this link</a>
+  and
+  <a href="https://kovan.etherscan.io/address/0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa#writeContract" target="_blank">mint some test tokens</a> in Kovan network by calling <code>mintTokens</code> function (mints 10 tokens to a calling account). <br/>Need some Ether in Kovan? <a href="https://www.google.com/search?q=kovan+ether+faucet" target="_blank">Find</a> any faucet that can give you some.
 </p>
 
 ## Delegated Transactions Concept
@@ -107,10 +110,10 @@ To perform a delegated transaction, the client has to send 2 POST requests (+ 2 
 ```javascript
 // >>>>>> POST /request
 {
-	"contractAddress": "0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa",
-	"from": "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A",
-	"functionName": "transfer",
-	"functionArguments": ["0xeee835EaaD87175E20aC048F9E5592CFbEf9161D", "6000000"]
+  "contractAddress": "0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa",
+  "from": "0xB3311c91d7c1B305DA3567C2320B716B13F24F8A",
+  "functionName": "transfer",
+  "functionArguments": ["0xeee835EaaD87175E20aC048F9E5592CFbEf9161D", "6000000"]
 }
 
 // <<<<<< (response)
@@ -189,9 +192,9 @@ To perform a delegated transaction, the client has to send 2 POST requests (+ 2 
 ```javascript
 // >>>>>> POST /confirm
 {
-	"requestId": "fbf098f2-e676-4b6c-9b73-f24fe1da2b9d", // ID obtained at the previous step
-	"signatureStandard": "eth_signTypedData", // Chosen signature standard
-	"signature": "0xf5c9fdee84b84787b3cc8beb654f237f3b554d8a20c47cf5e24edb630f047f77618dca1fd134a59ed5ac020fb36ff909a778b152cc9b3c85e044a572e96329401c"
+  "requestId": "fbf098f2-e676-4b6c-9b73-f24fe1da2b9d", // ID obtained at the previous step
+  "signatureStandard": "eth_signTypedData", // Chosen signature standard
+  "signature": "0xf5c9fdee84b84787b3cc8beb654f237f3b554d8a20c47cf5e24edb630f047f77618dca1fd134a59ed5ac020fb36ff909a778b152cc9b3c85e044a572e96329401c"
 }
 
 // <<<<<< (response)
