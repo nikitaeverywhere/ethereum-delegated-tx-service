@@ -16,7 +16,7 @@ export const mongodbConfig = {
 export const ethereumGlobalConfig = {
   networkName: networkName, // Global network for entire back end. If you need multiple networks, run multiple back ends.
   rpcProviders: process.env.RPC_PROVIDERS ? process.env.RPC_PROVIDERS.split(",") : [ // RPC endpoints
-    "https://kovan.infura.io/v3/26330e580e9d49ffb91482c15a92e86a"
+    `https://${ networkName }.infura.io/v3/26330e580e9d49ffb91482c15a92e86a`
   ],
   etherscanProviderApiKey: process.env.ETHERSCAN_API_KEY || "", // Fallback to Etherscan provider if specified
   requiredConfirmations: 3 // How many confirmations are required until the transaction is treated as mined
