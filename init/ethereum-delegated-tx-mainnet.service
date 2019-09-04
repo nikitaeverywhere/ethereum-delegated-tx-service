@@ -6,7 +6,7 @@ Type=simple
 Environment="MONGODB_URL=mongodb://localhost:27017" "API_PORT=8888" "NETWORK_NAME=mainnet"
 Restart=always
 RestartSec=1s
-ExecStart=/usr/bin/npm run start
+ExecStart=/usr/bin/node -r esm src
 WorkingDirectory=/home/zitro/apps/ethereum-delegated-tx-service-mainnet
 
 [Install]
