@@ -3,9 +3,7 @@ Description=Ethereum Delegated Transactions Service for Mainnet
 
 [Service]
 Type=simple
-Environment="MONGODB_URL=mongodb://localhost:27017"
-Environment="API_PORT=8888"
-Environment="NETWORK_NAME=mainnet"
+Environment="MONGODB_URL=mongodb://localhost:27017" "API_PORT=8888" "NETWORK_NAME=mainnet"
 Restart=always
 RestartSec=1s
 ExecStart=/usr/bin/npm run start
