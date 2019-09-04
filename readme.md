@@ -11,11 +11,11 @@ Primarily, delegated transactions, or meta transactions allow users to pay fee i
 + Ships with [highly-configurable UI](https://zitros.github.io/ethereum-delegated-tx-widget/)
 
 <p align="center">
-  <br/><b><a href="https://zitros.github.io/ethereum-delegated-tx-widget/" target="_blank">---> CHECK THE DEMO HERE! <---</a></b><br/><br/>
+  <br/><b><a href="https://zitros.github.io/ethereum-delegated-tx-widget/" target="_blank">→ CHECK THE DEMO HERE! ←</a></b><br/><br/>
   <img src="https://user-images.githubusercontent.com/4989256/64173367-cbec8080-ce5f-11e9-87c3-c1c77ae83dc4.png" alt="screenshot" width="360"><br/><br/>
-  Need test tokens? Use widget within <a href="https://zitros.github.io/ethereum-delegated-tx-widget/?contractAddress=0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa" target="_blank">this link</a>
+  Need test tokens? Use this widget via <a href="https://zitros.github.io/ethereum-delegated-tx-widget/?contractAddress=0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa" target="_blank">this link</a>
   and
-  <a href="https://kovan.etherscan.io/address/0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa#writeContract" target="_blank">mint some test tokens</a> in Kovan network by calling <code>mintTokens</code> function (mints 10 tokens to a calling account). <br/>Need some Ether in Kovan? <a href="https://www.google.com/search?q=kovan+ether+faucet" target="_blank">Find</a> any faucet that can give you some.
+  <a href="https://kovan.etherscan.io/address/0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa#writeContract" target="_blank">mint some test tokens</a> in Kovan network<br/>by calling <code>mintTokens</code> function (mints 10 tokens to a calling account). <br/>Need some Ether in Kovan? <a href="https://www.google.com/search?q=kovan+ether+faucet" target="_blank">Find</a> any faucet that can give you some.
 </p>
 
 ## Delegated Transactions Concept
