@@ -44,7 +44,7 @@ export async function getDelegatePrivateKey (delegateFile = delegateFiles.find(f
     return process.env.DELEGATE_PK;
   }
   if (delegateFile) {
-    return readFileSync(`${ __dirname }/delegate/${ delegateFile }`).toString();
+    return readFileSync(`${ __dirname }/delegate/${ delegateFile }`).toString().replace(/[^0-9a-f]*$/i, "");
   }
   return "2CCA9531DB0839E6C11B4B318FAF801C4B425B16D0B6D89D6AC11FB61F6A5F4B";
 }
