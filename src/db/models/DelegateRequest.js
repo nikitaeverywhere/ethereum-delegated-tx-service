@@ -20,11 +20,9 @@ let collectionPromise = getCollection("delegate-request");
 })();
 
 export async function create ({ id, context, from, fees, signatureOptions }) {
-  if (!fees) {
-    fees = [];
-  }
   if (
-    !(fees instanceof Array)
+    !fees
+    || !(fees instanceof Array)
     || fees.find(f => !isValidEthereumAddress(f.address) || typeof f.value !== "string" || isNaN(f.value))
   ) {
     throw new Error(`Unable to save request: invalid "fees" returned by token manifest file: ${
