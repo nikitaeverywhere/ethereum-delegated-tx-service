@@ -220,6 +220,37 @@ To perform a delegated transaction, the client has to send 2 POST requests (+ 2 
 }
 ```
 
+## Development & Testing
+
+You can optionally use [Docker container](https://www.docker.com) with Docker Compose to launch
+a thing (it ships with MongoDB). But it also works if you just run it with NodeJS 10+
+(make sure to set `MONGODB_URL` env variable in this case).
+
+Then, run the following:
+
+```bash
+bash docker-compose.sh # *nix
+# Wait for container to start. It will bring you to an api container. Then run:
+npm run start
+# Make sure to also replace private key in /config/delegate or provide DELEGATE_PK env variable
+```
+
+Or, without container:
+
+```bash
+export MONGODB_URL=mongodb://127.0.0.1:27017
+npm run start
+```
+
+Then open `http://localhost:8088`. To run UI locally, check
+[UI's repository](https://github.com/ZitRos/ethereum-delegated-tx-widget).
+
+You can play with [DREAM Token in Kovan network](https://kovan.etherscan.io/token/0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa#writeContract)
+(`0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa`) to understand how delegated back end works.
+To mint DREAM Token, call its `mintTokens` function. Then, `sender` will get 10 DREAM tokens.
+Later, you will be able to transfer these tokens using
+[delegated transactions service](https://zitros.github.io/ethereum-delegated-tx-widget/).
+
 ## Setup
 
 ### 1. Clone & decide how you'll run this back end
@@ -317,37 +348,6 @@ You have 2 options of how to provide your very own private key to the container/
 3. Use default public hard-coded private key (no way!).
 
 The delegate account's private key will be picked up from the above methods in order, if present.
-
-## Development
-
-You can optionally use [Docker container](https://www.docker.com) with Docker Compose to launch
-a thing (it ships with MongoDB). But it also works if you just run it with NodeJS 10+
-(make sure to set `MONGODB_URL` env variable in this case).
-
-Then, run the following:
-
-```bash
-bash docker-compose.sh # *nix
-# Wait for container to start. It will bring you to an api container. Then run:
-npm run start
-# Make sure to also replace private key in /config/delegate or provide DELEGATE_PK env variable
-```
-
-Or, without container:
-
-```bash
-export MONGODB_URL=mongodb://127.0.0.1:27017
-npm run start
-```
-
-Then open `http://localhost:8088`. To run UI locally, check
-[UI's repository](https://github.com/ZitRos/ethereum-delegated-tx-widget).
-
-You can play with [DREAM Token in Kovan network](https://kovan.etherscan.io/token/0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa#writeContract)
-(`0xcc7e25e30b065ea61814bec6ecdb17edb0f891aa`) to understand how delegated back end works.
-To mint DREAM Token, call its `mintTokens` function. Then, `sender` will get 10 DREAM tokens.
-Later, you will be able to transfer these tokens using
-[delegated transactions service](https://zitros.github.io/ethereum-delegated-tx-widget/).
 
 ## Is there anything missing?
 
