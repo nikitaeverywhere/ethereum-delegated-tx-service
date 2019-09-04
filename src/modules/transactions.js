@@ -1,5 +1,5 @@
 import { DelegateRequest } from "../db";
-import { ethereumGlobalConfig } from "../../config";
+import { ethereumGlobalConfig, instanceConfig } from "../../config";
 import { provider, errorCode, getWallet, getContract } from "./ethers";
 import { isNonceTooLowError, getStatusNameFromStatus } from "../utils";
 import { delegateRequestStatuses } from "../constants";
@@ -27,9 +27,10 @@ export async function syncAndPublish () {
 
   let nextNonce;
 
-  if (!lastMinedTx) { // No mined transactions: init; get the last nonce from the network
+  if (!lastMinedTx || lastMinedTx.publishedBy !== delegateWallet.address) {
+    // No mined transactions or another publisher: init; get the latest nonce from the network
     nextNonce = await provider.getTransactionCount(delegateWallet.address);
-  } else { // Mined transactions: pick the next nonce
+  } else { // Mined transactions present: pick the next nonce
     nextNonce = lastMinedTx.nonce + 1;
   }
   console.log(`${ new Date().toISOString() } | >>> Next nonce is ${ nextNonce }`);
@@ -112,11 +113,16 @@ export async function syncAndPublish () {
         nextNonce = nonce + 1;
         continue;
 
-      } else { // No TX receipt so far: wait for it; republish TX
-        // Do nothing (just wait), and skip to the next transaction in the queue
-        ++nextNonce;
-        continue;
       }
+        
+      // Todo:
+      // Republish a transaction if it was lost from the network
+      // if ((request.republishedAt || request.createdAt) < Date.now() - 1000 * instanceConfig.republishPendingTransactionsAfter) {
+        
+      // }
+
+      ++nextNonce;
+      continue;
 
     // Step 3.3. Publish confirmed transactions
     // Delegated Req [mined    ] -> [mined    ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
