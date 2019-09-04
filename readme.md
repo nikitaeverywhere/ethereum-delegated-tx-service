@@ -236,6 +236,7 @@ Use the next environment variables to configure a thing (all optional with defau
 
 ```bash
 ALLOWED_ORIGINS= # Comma-separated list of origins or empty for * (Access-Control-Allow-Origin header)
+API_PORT=8088
 DELEGATE_PK= # Delegated account private key, as an alternative to putting a file under `/config/delegate`
 MONGODB_URL=mongodb://mongo:27017
 MONGODB_DB_NAME=ethereum-delegated-tx-$NETWORK_NAME
@@ -308,6 +309,7 @@ Then, run the following:
 bash docker-compose.sh # *nix
 # Wait for container to start. It will bring you to an api container. Then run:
 npm run start
+# Make sure to also replace private key in /config/delegate or provide DELEGATE_PK env variable
 ```
 
 Or, without container:

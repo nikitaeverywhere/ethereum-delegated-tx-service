@@ -2,7 +2,7 @@ const networkName = process.env.NETWORK_NAME || "kovan";
 
 export const apiConfig = {
   host: "0.0.0.0",
-  port: 8088,
+  port: process.env.API_PORT || 8088,
   allowedOrigins: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(",")
     : "*"
