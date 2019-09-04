@@ -2,6 +2,7 @@ import { DelegateRequest } from "../db";
 import { ethereumGlobalConfig } from "../../config";
 import { provider, errorCode, getWallet, getContract } from "./ethers";
 import { isNonceTooLowError, getStatusNameFromStatus } from "../utils";
+import { delegateRequestStatuses } from "../constants";
 import { utils as ethersUtils } from "ethers";
 
 // Must always run single-threaded
@@ -18,7 +19,7 @@ export async function syncAndPublish () {
 
   const lastMinedTx = (await dr
     .find({
-      status: DelegateRequest.status.mined
+      status: delegateRequestStatuses.mined
     })
     .sort({ $natural: -1 })
     .limit(1)
@@ -48,9 +49,9 @@ export async function syncAndPublish () {
       }),
       status: { // Which is not "new" or "mined" (used $in because more statuses may be added at some point)
         $in: [
-          DelegateRequest.status.confirmed,
-          DelegateRequest.status.mining,
-          DelegateRequest.status.mined
+          delegateRequestStatuses.confirmed,
+          delegateRequestStatuses.mining,
+          delegateRequestStatuses.mined
         ]
       }
     })
@@ -69,7 +70,7 @@ export async function syncAndPublish () {
     // Delegated Req [mined    ] -> [mined    ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
     // Props         [nonce=3  ] -> [NONCE=4  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ]
     // Step                         ^^^^^^^^^^^
-    if (request.status === DelegateRequest.status.mined) {
+    if (request.status === delegateRequestStatuses.mined) {
 
       nextNonce = request.nonce + 1;
       console.log(`${ new Date().toISOString() } | >>> Request status is mined, skipping with nextNonce=${nextNonce}`);
@@ -79,7 +80,7 @@ export async function syncAndPublish () {
     // Delegated Req [mined    ] -> [mined    ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
     // Props         [nonce=3  ] -> [nonce=4  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ] -> [nonce=?  ]
     // Step                                        ^^^^^^^^^^^
-    } else if (request.status === DelegateRequest.status.mining) {
+    } else if (request.status === delegateRequestStatuses.mining) {
       console.log(`${ new Date().toISOString() } | >>> Request status is mining, getting receipt...`);
 
       const txReceipt = await provider.getTransactionReceipt(request.transactionHash);
@@ -100,7 +101,7 @@ export async function syncAndPublish () {
           _id: request._id
         }, {
           $set: {
-            status: DelegateRequest.status.mined,
+            status: delegateRequestStatuses.mined,
             txReceipt: txReceipt,
             nonce
           }
@@ -121,7 +122,7 @@ export async function syncAndPublish () {
     // Delegated Req [mined    ] -> [mined    ] -> [mining   ] -> [mining   ] -> [confirmed] -> [confirmed]
     // Props         [nonce=3  ] -> [nonce=4  ] -> [nonce=5  ] -> [nonce=6  ] -> [nonce=7  ] -> [nonce=?  ]
     // Step                                                                      ^^^^^^^^^^^
-    } else if (request.status === DelegateRequest.status.confirmed) {
+    } else if (request.status === delegateRequestStatuses.confirmed) {
       console.log(`${ new Date().toISOString() } | >>> Request status is confirmed, publishing (nonce=${nextNonce})`);
 
       try { // Try to publish transaction
@@ -133,7 +134,7 @@ export async function syncAndPublish () {
           _id: request._id
         }, {
           $set: {
-            status: DelegateRequest.status.mining,
+            status: delegateRequestStatuses.mining,
             transactionHash: transactionHash,
             nonce: nonce,
             publishedBy: delegateAddress
@@ -149,7 +150,7 @@ export async function syncAndPublish () {
           _id: request._id
         }, {
           $set: {
-            status: DelegateRequest.status.failed,
+            status: delegateRequestStatuses.failed,
             reason: e.code === errorCode.INSUFFICIENT_FUNDS
               ? "Delegate account has no Ether on its balance"
               : "Transaction error when publishing: " + (e.message || (e + ''))

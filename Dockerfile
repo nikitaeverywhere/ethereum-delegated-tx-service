@@ -8,5 +8,4 @@ RUN rm -rf node_modules && npm install
 
 EXPOSE 8088
 
-# ENTRYPOINT ["npm", "run", "start"]
-ENTRYPOINT ["node"]
+ENTRYPOINT ["npm", "run", "start"]

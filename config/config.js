@@ -1,24 +1,24 @@
-import isInDocker from "is-docker";
+const networkName = process.env.NETWORK_NAME || "kovan";
 
 export const apiConfig = {
   host: "0.0.0.0",
   port: 8088,
-  allowedOrigins: '*'
+  allowedOrigins: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : "*"
 };
 
 export const mongodbConfig = {
-  url: isInDocker()
-    ? "mongodb://mongo:27017" // === "mongo" in docker-compose.yml
-    : "mongodb://127.0.0.1:27017",
-  dbName: "ethereum-delegated-tx"
+  url: process.env.MONGODB_URL || "mongodb://SET.MONGODB_URL.ENV.VARIABLE.PLEASE:27017",
+  dbName: process.env.MONGODB_DB_NAME || `ethereum-delegated-tx-${ networkName }`
 };
 
 export const ethereumGlobalConfig = {
-  networkName: "kovan", // Global network for entire back end. If you need multiple networks, run multiple back ends.
-  rpcProviders: [ // RPC endpoints
+  networkName: networkName, // Global network for entire back end. If you need multiple networks, run multiple back ends.
+  rpcProviders: process.env.RPC_PROVIDERS ? process.env.RPC_PROVIDERS.split(",") : [ // RPC endpoints
     "https://kovan.infura.io/v3/26330e580e9d49ffb91482c15a92e86a"
   ],
-  etherscanProviderApiKey: "", // Fallback to Etherscan provider if specified
+  etherscanProviderApiKey: process.env.ETHERSCAN_API_KEY || "", // Fallback to Etherscan provider if specified
   requiredConfirmations: 3 // How many confirmations are required until the transaction is treated as mined
 };
 

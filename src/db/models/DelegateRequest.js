@@ -1,5 +1,7 @@
 import { getCollection } from "../db";
+import { delegateRequestStatuses } from "../../constants";
 import { instanceConfig } from "../../../config";
+import { isValidEthereumAddress } from "../../utils";
 
 let collectionPromise = getCollection("delegate-request");
 
@@ -17,25 +19,26 @@ let collectionPromise = getCollection("delegate-request");
   });
 })();
 
-// DO NOT RENAME PROPERTIES! USED TO GENERATED "status" IN RESPONSE BY PROPERTY NAME.
-export const status = {
-  new: 0, // the delegated transaction request was just requested and is not confirmed yet
-  confirmed: 1, // the transaction is confirmed and is ready to be published (picked up by worker shortly)
-  mining: 2, // the transaction is in mining state
-  mined: 3, // when the transaction is mined both successfully or with an error (but mined!)
-  failed: 4 // any failed attempts to publish or republish a transaction, including transaction drop, etc
-};
-
-export async function create ({ id, context, from, fee, signatureOptions }) {
+export async function create ({ id, context, from, fees, signatureOptions }) {
+  if (!fees) {
+    fees = [];
+  }
+  if (
+    !(fees instanceof Array)
+    || fees.find(f => !isValidEthereumAddress(f.address) || typeof f.value !== "string" || isNaN(f.value))
+  ) {
+    throw new Error(`Unable to save request: invalid "fees" returned by token manifest file: ${
+      JSON.stringify(fees) }. Fees must be an array of objects. Example: [{ address: "0x...", value: "123", decimals: 6, symbol: "DREAM" }]`);
+  }
   const collection = await collectionPromise;
   const now = new Date();
   const { utils, ...ctx } = context;
   const result = await collection.insertOne({
     id,
-    status: status.new,
+    status: delegateRequestStatuses.new,
     from,
     context: ctx,
-    fee,
+    fees,
     signatureOptions,
     createdAt: now,
     requestExpiresAt: new Date(now.getTime() + instanceConfig.requestExpiresAfterSeconds * 1000)

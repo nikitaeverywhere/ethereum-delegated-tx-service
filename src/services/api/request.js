@@ -19,9 +19,9 @@ export const handler = (app) => app.post("/request", asyncErrorHandler(async (re
   res.status(200).send({
     request: {
       id: request.id,
-      fee: request.fee,
-      signatureOptions: request.signatureOptions,
-      expiresAt: request.requestExpiresAt
+      expiresAt: request.requestExpiresAt,
+      fees: request.fees,
+      signatureOptions: request.signatureOptions
     }
   });
 }));

@@ -1,8 +1,7 @@
 import asyncErrorHandler from "express-async-handler";
-import { ethereumGlobalConfig, getSupportedContracts } from "../../../config";
+import { ethereumGlobalConfig } from "../../../config";
+import { supportedContractsPromise } from "../../modules/metadata";
 import { getNetwork } from "ethers/utils/networks";
-
-const supportedContractsPromise = getSupportedContracts();
 
 export const handler = (app) => app.get("/", asyncErrorHandler(async (req, res) => {
   const network = getNetwork(ethereumGlobalConfig.networkName);

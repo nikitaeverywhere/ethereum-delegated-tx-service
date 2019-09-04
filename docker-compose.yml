@@ -5,6 +5,8 @@ services:
         build:
             context: ./
             dockerfile: ./Dockerfile
+        environment:
+            - MONGODB_URL=mongodb://mongo:27017
         tty: true
         stdin_open: true
         ports:
@@ -14,9 +16,8 @@ services:
             - /app/node_modules
         links:
             - mongo
+        entrypoint: /bin/bash
     mongo:
-        ports:
-            - 27999:27017
         image: mongo:4.0.0
         tty: true
         privileged: true

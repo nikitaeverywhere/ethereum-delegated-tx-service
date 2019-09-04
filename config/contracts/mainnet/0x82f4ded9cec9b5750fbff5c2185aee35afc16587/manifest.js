@@ -37,7 +37,12 @@ export const delegatedFunctions = [
       gasLimit: async (context) => 46000 + await context.utils.getOriginalFunctionGasEstimate()
     }),
     requestHandler: (context) => ({ // Response generator, must use context only
-      fee: context.calculatedTokenFee,
+      fees: [
+        {
+          ...context.contract, // adds { address, decimals, symbol, implements: ["ERC20"] }
+          value: context.calculatedTokenFee
+        }
+      ],
       signatureOptions: [
         {
           standard: context.utils.signatureStandards.eth_signTypedData,

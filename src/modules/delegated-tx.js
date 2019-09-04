@@ -3,7 +3,9 @@ import { getManifest, ethereumGlobalConfig, instanceConfig } from "../../config"
 import { bindContextUtils } from "./context";
 import { getContract, getGasPrice } from "./ethers";
 import { DelegateRequest } from "../db";
+import { delegateRequestStatuses } from "../constants";
 import { httpGetWithCache } from "../utils";
+import { supportedContractsPromise } from "./metadata";
 
 async function getEthToUsd () {
   for (const { endpoint, getter, cacheDuration } of instanceConfig.ethToUsdPriceEndpoints) {
@@ -34,7 +36,11 @@ export async function createRequest ({ contractAddress, functionName, functionAr
   const manifest = await getManifest(contractAddress);
   const { delegatedFunctions } = manifest;
   const functionManifest = delegatedFunctions.find(f => f.functionName === functionName);
-  const contract = await getContract(contractAddress);
+  const contractMetadata = (await supportedContractsPromise).find(c => c.address === contractAddress);
+
+  if (!contractMetadata) {
+    throw new Error(`Contract ${ contractAddress } is not supported by this backend (missing manifest file or invalid case)`);
+  }
 
   functionArguments = functionArguments || [];
 
@@ -42,7 +48,8 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     ...rest,
     contract: {
       address: contractAddress,
-      decimals: +(await contract.decimals()) // Todo: cache
+      implements: contractMetadata.implements,
+      ...contractMetadata.constants // decimals, symbol
     },
     functionName,
     functionArguments,
@@ -57,9 +64,11 @@ export async function createRequest ({ contractAddress, functionName, functionAr
   try {
     context = Object.assign(
       baseContext,
-      functionManifest.requestContext
+      typeof functionManifest.requestContext === "function"
         ? await functionManifest.requestContext(baseContext)
-        : {}
+        : functionManifest.requestContext
+          ? functionManifest.requestContext
+          : {}
     );
   } catch (e) {
     console.error(e);
@@ -102,7 +111,7 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
   if (!(request.signatureOptions instanceof Array)) {
     throw new Error(`Something bad with request id=${ requestId }, it has no signatureOptions recorded`);
   }
-  if (request.status !== DelegateRequest.status.new) {
+  if (request.status !== delegateRequestStatuses.new) {
     throw new Error(`The request ${ requestId } has already been confirmed`);
   }
 
@@ -148,17 +157,17 @@ export async function confirmRequest (requestId, signatureStandard, signature) {
     throw new Error(`An actual transaction gas ${ gasLimitEstimate } exceeds requested gas limit ${ request.context.gasLimit }. Provide a higher 'gasLimit' in the delegated transaction request to confirm this transaction`);
   }
 
-  const previousTransactions = await DelegateRequest.findCount({ requestExpiresAt: { $gt: new Date(0) }, status: { $ne: DelegateRequest.status.new }, from: request.from });
+  const previousTransactions = await DelegateRequest.findCount({ requestExpiresAt: { $gt: new Date(0) }, status: { $ne: delegateRequestStatuses.new }, from: request.from });
   if (previousTransactions > maxPendingTransactionsPerAccount) {
     throw new Error(`Unable to submit more than ${ maxPendingTransactionsPerAccount } transactions for the same from=${ request.from }. Confirm and wait until ${ previousTransactions } previous transactions are mined`);
   }
 
   const { value } = await DelegateRequest.findOneAndUpdate({
     _id: request._id,
-    status: DelegateRequest.status.new // Prevents concurrency vulnerabilities
+    status: delegateRequestStatuses.new // Prevents concurrency vulnerabilities
   }, {
     $set: {
-      status: DelegateRequest.status.confirmed,
+      status: delegateRequestStatuses.confirmed,
       signature,
       signatureStandard,
       delegatedFunctionName,

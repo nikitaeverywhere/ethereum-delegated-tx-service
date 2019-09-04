@@ -1,4 +1,4 @@
-import { status as delegateRequestStatuses } from "../db/models/DelegateRequest";
+import { delegateRequestStatuses } from "../constants";
 
 export const getStatusNameFromStatus = (status) => {
   return Object.entries(delegateRequestStatuses).find(([, i]) => i === status)[0];

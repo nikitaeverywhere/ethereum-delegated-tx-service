@@ -6,7 +6,7 @@ const manifestErrorPrefix = (address) => `Manifest validation failed for ${ addr
 
 const contractsPath = `${ __dirname }/contracts/${ ethereumGlobalConfig.networkName }`;
 const registeredContractAddresses = readdirSync(contractsPath);
-const registeredContractsPromise = (async () => ( // address => { abi, manifest }
+export const registeredContractsPromise = (async () => ( // address => { abi, manifest }
   await Promise.all(registeredContractAddresses.map(async address => {
     const [abiModule, manifest] = await Promise.all([
       import(`${ contractsPath }/${ address }/abi.json`),
@@ -40,30 +40,14 @@ export async function getManifest (contractAddress) {
 }
 
 export async function getDelegatePrivateKey (delegateFile = delegateFiles[0]) {
+  if (process.env.DELEGATE_PK) {
+    return process.env.DELEGATE_PK;
+  }
   if (!delegateFiles.length) {
     throw new Error("No delegates found in /config/delegate/*. Put a delegate private key there in the next format: { \"privateKey\": \"ABC...BCA\" }.");
   }
   const json = await import(`./delegate/${ delegateFile }`); // Cached
   return json.privateKey;
-}
-
-export async function getSupportedContracts () {
-  const map = await registeredContractsPromise;
-  const contracts = [];
-  for (const [address, { manifest, abi }] of map.entries()) {
-    contracts.push({
-      address,
-      implements: [
-        isErc20(abi) && "ERC20",
-        isErc721(abi) && "ERC721"
-      ].filter(o => !!o),
-      functions: manifest.delegatedFunctions.map(f => ({
-        name: f.functionName,
-        arguments: (abi.find(o => o.name === f.functionName) || { inputs: [] }).inputs
-      }))
-    });
-  }
-  return contracts;
 }
 
 function validateManifest (manifest, address = "0x<unknown>") {
@@ -83,28 +67,4 @@ function validateManifest (manifest, address = "0x<unknown>") {
 
   // Todo: more validation
 
-}
-
-function isErc20 (abi) {
-  const signatures = new Set();
-  for (const i of abi) {
-    signatures.add(`${ i.name }(${ i.inputs.map(inp => inp.type).join(",") })`);
-  }
-  return signatures.has("transfer(address,uint256)")
-    && signatures.has("transferFrom(address,address,uint256)")
-    && signatures.has("approve(address,uint256)")
-    && signatures.has("decimals()")
-    && signatures.has("totalSupply()")
-    && signatures.has("balanceOf(address)");
-}
-
-function isErc721 (abi) {
-  const signatures = new Set();
-  for (const i of abi) {
-    signatures.add(`${ i.name }(${ i.inputs.map(inp => inp.type).join(",") })`);
-  }
-  return signatures.has("transfer(address,uint256)")
-    && signatures.has("transferFrom(address,address,uint256)")
-    && signatures.has("approve(address,uint256)")
-    && signatures.has("ownerOf(uint256)");
 }
