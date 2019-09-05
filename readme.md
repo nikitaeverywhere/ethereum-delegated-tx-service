@@ -2,7 +2,7 @@
 
 Elegant Ethereum delegated transactions implementation.
 
-Primarily, delegated transactions, or meta transactions allow users to pay fee in tokens instead of Ether, making crypto user experience great again. This back end is shipped with [configurable widget](https://github.com/ZitRos/ethereum-delegated-tx-widget), which can be used for any token or smart contract supporting doing-something-via-signature.
+Primarily, delegated transactions, or meta transactions allow users to pay fees in tokens instead of Ether, making the crypto user experience great again. This back end is shipped with [configurable widget](https://github.com/ZitRos/ethereum-delegated-tx-widget), which can be used for any token or smart contract supporting doing-something-via-signature.
 
 + Allows users to pay fee in tokens instead of Ether, making crypto UX great again
 + Universal back end **for any Ethereum contract implementation**
@@ -22,9 +22,9 @@ Primarily, delegated transactions, or meta transactions allow users to pay fee i
 
 - ✔ Any token implementation (which supports delegated transactions, for example, [DREAM](https://etherscan.io/token/0x82f4ded9cec9b5750fbff5c2185aee35afc16587))
 - ✔ Any signature standard (supported by wallets)
-- ⚠ Only manifest file is required for each token (see `/config/contracts`)
+- ⚠ Only the manifest file is required for each token (see `/config/contracts`)
 
-This back end works for any smart contracts (primarily for token smart contracts) which support delegated transactions. By design, such smart contracts should expose functions which allow to run its "original functions" by signature, or, in other words, allowing to **avoid paying fee in Ether**. For instance:
+This back end works for any smart contracts (primarily for token smart contracts) which support delegated transactions. By design, such smart contracts should expose functions which allow running its "original functions" by signature, or, in other words, allowing to **avoid paying fees in Ether**. For instance:
 
 ```javascript
 //         ↓↓↓↓↓↓↓↓ Original function
@@ -230,12 +230,12 @@ Then, run the following:
 
 ```bash
 bash docker-compose.sh # *nix
-# Wait for container to start. It will bring you to an api container. Then run:
+# Wait for the container to start. It will bring you to an API container. Then run:
 npm run start
-# Make sure to also replace private key in /config/delegate or provide DELEGATE_PK env variable
+# Make sure to also place the plain private key in /config/delegate/any-file-name or provide DELEGATE_PK environment variable
 ```
 
-Or, without container:
+Or, without a container:
 
 ```bash
 export MONGODB_URL=mongodb://127.0.0.1:27017
@@ -253,6 +253,11 @@ Later, you will be able to transfer these tokens using
 
 ## Setup
 
+You can easily run your own delegated transactions back end **to support your own token**.
+Read through the concept above and perform the steps below to plug in your token to this
+delegated back end. Don't forget to make a [pull request](https://github.com/ZitRos/ethereum-delegated-tx-service/pulls)
+with your token manifest file!
+
 ### 1. Clone & decide how you'll run this back end
 
 ```bash
@@ -261,7 +266,7 @@ cd ethereum-delegated-tx-service
 ```
 
 - You can run the application without container. Just `npm install` and you're ready with `npm start` (note env variables below).
-- Use `Dockerfile` to build a container. Container exposes port `8088` by default. Note env variables below which you have to pass there.
+- Use `Dockerfile` to build a container. The container exposes port `8088` by default. Note env variables below which you have to pass there.
 - For development purposes, just run `./docker-compose.sh`.
 
 ### 2. Configure delegated transactions back end
@@ -305,7 +310,7 @@ is a dynamic thing (due to exchange integration, custom logic, etc).
 - Please, use `context.utils` for everything related to the outer world. Check [src/modules/context.js](src/modules/context.js) file for functions you may use there.
 - Once done and tested, *you can submit a PR to this repository with your manifest file or create an issue if something goes wrong*
 
-### 4. Deal with `context` in manifest file (if you haven't dealt with it yet)
+### 4. Deal with `context` in the manifest file (if you haven't dealt with it yet)
 
 **Context** is an object (a set of properties) which stays within a delegated request from its creation till execution. Once the user performs `/request`, this base context is generated:
 
@@ -344,10 +349,10 @@ Its private key is hard-coded and is used if you don't provide another private k
 You have 2 options of how to provide your very own private key to the container/back end:
 
 1. Set `DELEGATE_PK=2CCA...C1FA` environment variable.
-2. Put a single file with plain private key to `/config/delegate/<any-file-name>`.
+2. Put a single file with the plain private key to `/config/delegate/<any-file-name>`.
 3. Use default public hard-coded private key (no way!).
 
-The delegate account's private key will be picked up from the above methods in order, if present.
+The delegate account's private key will be picked up from the above methods in order if present.
 
 ## Is there anything missing?
 

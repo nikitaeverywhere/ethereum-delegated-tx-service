@@ -19,7 +19,7 @@ async function getEthToUsd () {
       }
       return res;
     } catch (e) {
-      console.warn(`Endpoint ETH/USD retrieval failed for ${ endpoint } (${ e }), switching to the next endpoint`);
+      console.warn(`${ new Date().toISOString() } | Endpoint ETH/USD retrieval failed for ${ endpoint } (${ e }), switching to the next endpoint`);
     }
   }
   return 999999999;

@@ -46,6 +46,7 @@ export async function getDelegatePrivateKey (delegateFile = delegateFiles.find(f
   if (delegateFile) {
     return readFileSync(`${ __dirname }/delegate/${ delegateFile }`).toString().replace(/[^0-9a-f]*$/i, "");
   }
+  console.warn(`${ new Date().toISOString() } | !!!WARNING!!! Default delegate account 0xeee835eaad87175e20ac048f9e5592cfbef9161d is in use. Its private key is exposed. Please, provide "DELEGATE_PK" environment variable with your private key or put the plain private key to /config/delegate/<any-file-name>.`);
   return "2CCA9531DB0839E6C11B4B318FAF801C4B425B16D0B6D89D6AC11FB61F6A5F4B";
 }
 
