@@ -38,7 +38,7 @@ erc20Token.transferViaSignature(to, value, fee, feeRecipient, deadline, sigId, s
 
 (more information will be provided soon)
 
-## Workflow
+## API
 
 To perform a delegated transaction, the client has to send 2 POST requests (+ 2 optional GET requests to get back end metadata and check the status of the transaction). In general, this back end is designed to support the following full workflow:
 
