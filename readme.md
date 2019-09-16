@@ -284,6 +284,7 @@ MONGODB_DB_NAME=ethereum-delegated-tx-$NETWORK_NAME
 NETWORK_NAME=kovan
 RPC_PROVIDERS=https://kovan.infura.io/v3/ABC,https://kovan.infura.io/v3/DEF # Comma-separated list of RPC providers
 ETHERSCAN_API_KEY= # Optional Etherscan API key as a fallback provider
+MAX_PENDING_TX_PER_ACCOUNT=5
 ```
 
 Then, put contract ABI and write a manifest file for each of your contract by example. You should have 2 files for each of your contracts:

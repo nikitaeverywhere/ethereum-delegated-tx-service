@@ -23,8 +23,8 @@ export const ethereumGlobalConfig = {
 };
 
 export const instanceConfig = {
-  maxPendingTransactionsPerAccount: 5,
-  maxPendingTransactions: 50,
+  maxPendingTransactionsPerAccount: +process.env.MAX_PENDING_TX_PER_ACCOUNT || 5,
+  maxPendingTransactions: 50, // Currently unused
   requestExpiresAfterSeconds: 30 * 60, // Number of seconds the delegated transaction request is alive
   ethToUsdPriceEndpoints: [ // JSON endpoints. If one of them is not available, the next one is queried
     {
