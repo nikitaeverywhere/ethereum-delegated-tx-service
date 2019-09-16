@@ -262,6 +262,12 @@ with your token manifest file!
 
 ### 1. Clone & decide how you'll run this back end
 
+```
+docker pull zitros/ethereum-delegated-tx-service
+```
+
+or
+
 ```bash
 git clone https://github.com/ZitRos/ethereum-delegated-tx-service.git
 cd ethereum-delegated-tx-service
