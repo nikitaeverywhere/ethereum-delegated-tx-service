@@ -27,8 +27,7 @@ export function isErc721 (abi) {
   for (const i of abi) {
     signatures.add(`${ i.name }(${ i.inputs.map(inp => inp.type).join(",") })`);
   }
-  return signatures.has("transfer(address,uint256)")
-    && signatures.has("transferFrom(address,address,uint256)")
+  return signatures.has("transferFrom(address,address,uint256)")
     && signatures.has("approve(address,uint256)")
     && signatures.has("ownerOf(uint256)");
 }

@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { mongodbConfig } from "../../config";
+import { getPrintableMongodbURL } from "../utils";
 
 let dbClient = null;
 
@@ -13,7 +14,7 @@ export const getDb = async () => {
   return dbClient = new Promise((res, rej) => MongoClient.connect(mongodbConfig.url, (err, client) => {
       if (err) {
         dbClient = null;
-        rej(err);
+        rej(new Error(`Unable to connect to ${ getPrintableMongodbURL(mongodbConfig.url) }: ${ err }`));
         return;
       }
       dbClient = client.db(mongodbConfig.dbName);
