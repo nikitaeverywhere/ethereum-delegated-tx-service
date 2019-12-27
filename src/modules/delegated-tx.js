@@ -56,7 +56,7 @@ export async function createRequest ({ contractAddress, functionName, functionAr
     from,
     gasPriceWei: await getGasPrice(), // Cached
     ethToUsd: await getEthToUsd(), // Cached
-    gasLimit: rest.gasLimit || undefined // May not be specified
+    gasLimit: gasLimit || undefined // May not be specified
   };
   bindContextUtils(baseContext);
 
