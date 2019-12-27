@@ -33,6 +33,8 @@ export async function getRequestById (requestId) {
 
 export async function createRequest ({ contractAddress, functionName, functionArguments, from, gasLimit, ...rest }) {
 
+  contractAddress = contractAddress.toString().toLowerCase();
+
   const manifest = await getManifest(contractAddress);
   const { delegatedFunctions } = manifest;
   const functionManifest = delegatedFunctions.find(f => f.functionName === functionName);
