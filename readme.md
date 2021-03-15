@@ -38,7 +38,7 @@ erc20Token.transferViaSignature(to, value, fee, feeRecipient, deadline, sigId, s
 //                    Additional arguments ↑↑↑  ↑↑↑↑↑↑↑↑↑↑↑↑  ↑↑↑↑↑↑↑↑  ↑↑↑↑↑  ↑↑↑  ↑↑↑↑↑↑↑↑↑↑↑
 ```
 
-(more information will be provided soon)
+You can read [this article](https://www.freecodecamp.org/news/universal-ethereum-delegated-transactions-no-more-ethereum-fees/) to understand the delegated transactions concept.
 
 ## API
 
@@ -368,4 +368,4 @@ The delegate account's private key will be picked up from the above methods in o
 ❓ Do not hesitate to ask anything regarding delegated transactions [here](https://github.com/ZitRos/ethereum-delegated-tx-service/issues) (for back end and general inquiries), as well as [here](https://github.com/ZitRos/ethereum-delegated-tx-widget/issues)
 (for front end / widget).
 
-There is also an article coming soon, which will explain the concept in detail.
+Please also read [this article](https://www.freecodecamp.org/news/universal-ethereum-delegated-transactions-no-more-ethereum-fees/) to understand the concept of delegated transactions.
