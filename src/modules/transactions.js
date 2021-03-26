@@ -114,12 +114,11 @@ export async function syncAndPublish () {
         continue;
 
       }
-        
-      // Todo:
-      // Republish a transaction if it was lost from the network
-      // if ((request.republishedAt || request.createdAt) < Date.now() - 1000 * instanceConfig.republishPendingTransactionsAfter) {
-        
-      // }
+
+      // If no transaction receipt found for a while, republish transaction
+      if ((request.publishedAt || request.createdAt) < Date.now() - 1000 * instanceConfig.republishPendingTransactionsAfter) {
+        await republishTransaction(request);
+      }
 
       ++nextNonce;
       continue;
@@ -133,7 +132,9 @@ export async function syncAndPublish () {
 
       try { // Try to publish transaction
 
-        const { transactionHash, nonce, delegateAddress } = await publishTransaction(request, nextNonce);
+        const {
+          transactionHash, nonce, delegateAddress, lastPublishedTransactionParams
+        } = await publishTransaction(request, nextNonce);
         console.log(`${ new Date().toISOString() } | >>> Published TX hash=${ transactionHash }, nonce=${ nonce }`);
 
         await dr.findOneAndUpdate({ // Update status, transactionHash, nonce (can be higher due to unknown TXs)
@@ -143,7 +144,9 @@ export async function syncAndPublish () {
             status: delegateRequestStatuses.mining,
             transactionHash: transactionHash,
             nonce: nonce,
-            publishedBy: delegateAddress
+            publishedBy: delegateAddress,
+            publishedAt: Date.now(),
+            ...(lastPublishedTransactionParams ? { lastPublishedTransactionParams } : {})
           }
         });
 
@@ -176,6 +179,50 @@ export async function syncAndPublish () {
 
 }
 
+// Ethers.js doesn't provide raw transaction interface, hence we need to re-assemble the transaction
+// and sign it. The signed transaction with same parameters will be always the same transaction.
+async function republishTransaction (confirmedRequest) {
+  console.log(`${ new Date().toISOString() } | >>> Ensuring transaction ${confirmedRequest.transactionHash} is published.`);
+  if (!confirmedRequest.lastPublishedTransactionParams || !confirmedRequest.publishedBy) {
+    console.log(`${ new Date().toISOString() } | >>> No saved transaction params to republish ${confirmedRequest.transactionHash}.`);
+    return;
+  }
+
+  const contract = await getContract(confirmedRequest.context.contract.address);
+  const publishingAddress = await contract.signer.getAddress();
+
+  if (publishingAddress !== confirmedRequest.publishedBy) {
+    console.warn(`${ new Date().toISOString() } | >>> Not re-publishing transaction ${
+      confirmedRequest.transactionHash}, as signer's address has changed: current signer is ${publishingAddress
+      } instead of ${confirmedRequest.publishedBy}.`);
+    return;
+  }
+
+  try {
+    // The signer will sign the same transaction once again, getting the same raw transaction (Ethers.js doesn't export it).
+    await contract.signer.sendTransaction(confirmedRequest.lastPublishedTransactionParams);
+
+    // Update publishedAt.
+    const dr = await DelegateRequest.collection();
+    await dr.findOneAndUpdate({
+      _id: confirmedRequest._id
+    }, {
+      $set: {
+        publishedAt: Date.now()
+      }
+    });
+  } catch (e) {
+    if (
+      e.toString().indexOf('is too low') !== -1 // An RPC answer if TX is already there
+      || e.toString().indexOf('same hash') !== -1 // Some RPCs like Infura can answer that they already have this TX sent
+    ) {
+      console.log(`${ new Date().toISOString() } | >>> Transaction ${confirmedRequest.transactionHash} is present in the network.`);
+    } else {
+      console.error(`${ new Date().toISOString() } | >>> Error when re-publishing transaction ${confirmedRequest.transactionHash}: ${e}`);
+    }
+  }
+}
+
 async function publishTransaction (confirmedRequest, nonce) {
 
   const contract = await getContract(confirmedRequest.context.contract.address);
@@ -194,21 +241,30 @@ async function publishTransaction (confirmedRequest, nonce) {
       }));
       transactionHash = tx.hash;
       delegate = tx.from;
-      break;
+
+      return {
+        transactionHash,
+        nonce,
+        delegateAddress: delegate,
+        lastPublishedTransactionParams: tx ? {
+          // Schema from https://npm-explorer.tk/?p=ethers@4.0.33/dist/ethers.js&selection=16267:0-16266:0
+          chainId: tx.chainId,
+          data: tx.data,
+          gasLimit: tx.gasLimit.toHexString(),
+          gasPrice: tx.gasPrice.toHexString(),
+          nonce: tx.nonce,
+          to: tx.to,
+          value: tx.value.toHexString()
+        } : null,
+      };
     } catch (e) {
       if (isNonceTooLowError(e)) {
         console.log(`${ new Date().toISOString() } | >>> Nonce ${ nonce } is too low, incrementing and trying again...`);
         ++nonce;
         continue;
       }
+      console.error(`${ new Date().toISOString() } | >>> Error when publishing transaction`, e);
       throw e;
     }
   }
-
-  return {
-    transactionHash,
-    nonce,
-    delegateAddress: delegate
-  };
-
 }

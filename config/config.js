@@ -25,17 +25,14 @@ export const ethereumGlobalConfig = {
 export const instanceConfig = {
   maxPendingTransactionsPerAccount: +process.env.MAX_PENDING_TX_PER_ACCOUNT || 5,
   maxPendingTransactions: 50, // Currently unused
+  republishPendingTransactionsAfter: 10 * 60, // In seconds. 10 * 60 = transaction will be republished after 10 minutes in "mining" state.
   requestExpiresAfterSeconds: 30 * 60, // Number of seconds the delegated transaction request is alive
   ethToUsdPriceEndpoints: [ // JSON endpoints. If one of them is not available, the next one is queried
-    {
-      endpoint: "https://api.coinmarketcap.com/v1/ticker/ethereum/",
-      getter: (response) => +response[0].price_usd,
-      cacheDuration: 60 * 5 // 5 min
-    },
     {
       endpoint: "https://api.etherscan.io/api?module=stats&action=ethprice",
       getter: (response) => +response.result.ethusd,
       cacheDuration: 60 * 5 // 5 min
     }
+    // Add more fallback endpoints here if the above one is not available.
   ]
 };

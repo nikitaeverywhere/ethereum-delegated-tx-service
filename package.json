@@ -6,7 +6,7 @@
   "module": "src/main.js",
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0",
-    "start": "node -r esm src"
+    "start": "env-cmd -f env/default.env -f env/local.env node -r esm src"
   },
   "repository": {
     "type": "git",
@@ -35,6 +35,7 @@
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "env-cmd": "^10.1.0",
     "esm": "^3.2.25",
     "ethers": "^4.0.33",
     "express": "^4.17.1",

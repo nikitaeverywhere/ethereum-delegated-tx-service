@@ -3,3 +3,4 @@ config/delegate/
 .config/
 .npm/
 .node*
+/env/local.env

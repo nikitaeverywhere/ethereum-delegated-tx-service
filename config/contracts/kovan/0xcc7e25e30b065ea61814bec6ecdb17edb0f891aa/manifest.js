@@ -14,8 +14,10 @@ const defaultContext = (opts) => async (context) => { // Adds returned propertie
     calculatedTokenFee: context.utils.multiply(
       Math.pow(10, context.contract.decimals),
       ...(await Promise.all([
-        context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/dreambtc"),
-        context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/btcusd")
+        // Kuna endpoints are gone, replacing with a constant conversion rate.
+        // context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/dreambtc"),
+        // context.utils.httpGetWithCache("https://kuna.io/api/v2/tickers/btcusd")
+        (async () => ({ ticker: { last: 50 } }))()
       ])).map(res => 1 / res.ticker.last),
       +context.gasPriceWei / Math.pow(10, 18), // = gas price in ETH
       context.ethToUsd,

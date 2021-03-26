@@ -39,7 +39,9 @@ export async function create ({ id, context, from, fees, signatureOptions }) {
     fees,
     signatureOptions,
     createdAt: now,
-    requestExpiresAt: new Date(now.getTime() + instanceConfig.requestExpiresAfterSeconds * 1000)
+    publishedAt: 0,
+    requestExpiresAt: new Date(now.getTime() + instanceConfig.requestExpiresAfterSeconds * 1000),
+    lastPublishedTransactionParams: null, // Object with keys of https://npm-explorer.tk/?p=ethers@4.0.33/dist/ethers.js&selection=16267:0-16266:0
   });
   const doc = result.ops[0];
   delete doc._id;
